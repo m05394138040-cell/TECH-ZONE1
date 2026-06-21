@@ -86,6 +86,42 @@
     </div>
   </div>
 
+  <div class="form-section">
+    <h2>📰 الشريط الإخباري</h2>
+    <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
+      شريط نصي متحرك يظهر بين الـ hero وقسم الأقسام. ممكن تفعّله، توقّفه، تغيّر النص أو اللون.
+    </p>
+
+    <div class="form-group">
+      <label class="checkbox-row" style="display: inline-flex; width: auto; padding: 8px 16px;">
+        <input type="checkbox" name="ticker_enabled" <%= settings.ticker_enabled === 'true' || !settings.ticker_enabled ? 'checked' : '' %> />
+        <span>إظهار الشريط الإخباري</span>
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label for="ticker_text">النص (استخدم • أو | للفصل بين الرسائل)</label>
+      <textarea id="ticker_text" name="ticker_text" rows="3" placeholder="مثال: عروض حصرية على السماعات • شحن مجاني للطلبات فوق 50$ • ضمان سنة كاملة"><%= settings.ticker_text || '' %></textarea>
+    </div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="ticker_color">لون النص</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="color" id="ticker_color" name="ticker_color" value="<%= settings.ticker_color || '#ffffff' %>" style="width: 60px; height: 40px; padding: 2px; cursor: pointer;" />
+          <input type="text" value="<%= settings.ticker_color || '#ffffff' %>" readonly style="flex: 1; font-family: monospace;" id="ticker_color_text" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="ticker_bg_color">لون الخلفية</label>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <input type="color" id="ticker_bg_color" name="ticker_bg_color" value="<%= settings.ticker_bg_color || '#0a0a0a' %>" style="width: 60px; height: 40px; padding: 2px; cursor: pointer;" />
+          <input type="text" value="<%= settings.ticker_bg_color || '#0a0a0a' %>" readonly style="flex: 1; font-family: monospace;" id="ticker_bg_color_text" />
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div style="display: flex; gap: 12px;">
     <button type="submit" class="btn btn-primary">💾 حفظ الإعدادات</button>
   </div>

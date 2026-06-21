@@ -416,6 +416,13 @@ router.post('/settings', upload.single('logo'), async (req, res, next) => {
       await setSetting(field, value);
     }
 
+    // Save ticker settings
+    const tickerEnabled = req.body.ticker_enabled === 'on' || req.body.ticker_enabled === 'true';
+    await setSetting('ticker_enabled', tickerEnabled ? 'true' : 'false');
+    await setSetting('ticker_text', (req.body.ticker_text || '').trim());
+    await setSetting('ticker_color', (req.body.ticker_color || '#ffffff').trim());
+    await setSetting('ticker_bg_color', (req.body.ticker_bg_color || '#0a0a0a').trim());
+
     if (req.file) {
       // store logo as base64
       await setSetting('logo_image', req.file.buffer.toString('base64'));

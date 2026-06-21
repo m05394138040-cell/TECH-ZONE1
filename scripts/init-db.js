@@ -78,6 +78,21 @@ async function createTables() {
     );
   }
 
+  // Add news ticker settings
+  const tickerSettings = [
+    ['ticker_enabled', 'true'],
+    ['ticker_text', '🔥 عروض حصرية على السماعات • شحن مجاني للطلبات فوق 50$ • ضمان سنة كاملة على جميع المنتجات • توصيل سريع لكل المناطق'],
+    ['ticker_color', '#ffffff'],
+    ['ticker_bg_color', '#0a0a0a'],
+  ];
+  for (const [key, value] of tickerSettings) {
+    await query(
+      `INSERT INTO settings (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO NOTHING`,
+      [key, value]
+    );
+  }
+
   await query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,
