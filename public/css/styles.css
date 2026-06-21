@@ -184,10 +184,25 @@ input:focus, textarea:focus, select:focus {
   box-shadow: var(--shadow-md);
 }
 
+.header-logo-img {
+  height: 50px;
+  width: auto;
+  display: block;
+}
+
 /* ---------- Hero (Home) ---------- */
 .hero {
   text-align: center;
   padding: 40px 16px 16px;
+}
+
+.hero-logo {
+  max-width: 700px;
+  width: 90%;
+  height: auto;
+  margin: 0 auto 20px;
+  display: block;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.15));
 }
 
 .hero h1 {

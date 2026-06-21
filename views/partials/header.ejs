@@ -14,11 +14,7 @@
   <header class="site-header">
     <div class="header-inner">
       <a href="/" class="logo">
-        <% if (settings.logo_image) { %>
-          <img src="/logo" alt="<%= siteName %>" class="header-logo-img" style="width:240px; height:auto;" />
-        <% } else { %>
-          <%- include('header-logo') %>
-        <% } %>
+        <img src="/img/logo-header.png?v=2" alt="<%= siteName %>" class="header-logo-img" />
       </a>
       <div class="header-actions">
         <% if (isAdmin) { %>
