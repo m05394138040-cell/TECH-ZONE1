@@ -227,6 +227,88 @@ input:focus, textarea:focus, select:focus {
   width: 30%;
 }
 
+.nav-contact-wrapper {
+  position: relative;
+}
+.nav-contact-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nav-contact-btn .caret {
+  font-size: 10px;
+  transition: transform var(--transition);
+  display: inline-block;
+}
+.nav-contact-btn[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
+}
+
+.contact-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%) translateY(-8px);
+  min-width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 200;
+}
+.contact-dropdown.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(50%) translateY(0);
+}
+.contact-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 50%;
+  transform: translateX(50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+.contact-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.contact-dropdown a:hover {
+  background: rgba(212, 175, 55, 0.12);
+  color: var(--gold-dark);
+}
+.contact-dropdown a svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.contact-dropdown .dropdown-empty {
+  padding: 16px 12px;
+  text-align: center;
+  color: var(--text-soft);
+  font-size: 13px;
+}
+
 /* ---------- Hero (Home) ---------- */
 .hero {
   text-align: center;

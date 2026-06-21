@@ -94,4 +94,31 @@
       if (!confirm(msg)) e.preventDefault();
     });
   });
+
+  // ===== Contact dropdown toggle =====
+  const contactBtn = document.getElementById('contactToggle');
+  const contactDropdown = document.getElementById('contactDropdown');
+  if (contactBtn && contactDropdown) {
+    contactBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = contactDropdown.classList.toggle('open');
+      contactBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!contactBtn.contains(e.target) && !contactDropdown.contains(e.target)) {
+        contactDropdown.classList.remove('open');
+        contactBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && contactDropdown.classList.contains('open')) {
+        contactDropdown.classList.remove('open');
+        contactBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 })();
