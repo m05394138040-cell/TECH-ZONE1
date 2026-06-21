@@ -30,12 +30,12 @@
   <table class="admin-table">
     <thead>
       <tr>
-        <th style="width: 60px;">الترتيب</th>
+        <th style="width: 90px;">الترتيب</th>
         <th style="width: 70px;">الأيقونة/الصورة</th>
         <th>اسم القسم</th>
         <th>المعرف (slug)</th>
         <th style="width: 100px;">المنتجات</th>
-        <th style="width: 380px;">إجراءات</th>
+        <th style="width: 410px;">إجراءات</th>
       </tr>
     </thead>
     <tbody>
@@ -44,7 +44,17 @@
       <% } %>
       <% categories.forEach(function(cat) { %>
         <tr>
-          <td><%= cat.sort_order %></td>
+          <td>
+            <div style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+              <form method="POST" action="/admin/categories/<%= cat.id %>/move-up" style="margin: 0;">
+                <button type="submit" class="btn-order btn-order-up" title="رفع للأعلى">▲</button>
+              </form>
+              <span style="font-weight: 700; color: var(--gold); font-size: 13px;"><%= cat.sort_order %></span>
+              <form method="POST" action="/admin/categories/<%= cat.id %>/move-down" style="margin: 0;">
+                <button type="submit" class="btn-order btn-order-down" title="إنزال للأسفل">▼</button>
+              </form>
+            </div>
+          </td>
           <td>
             <% if (cat.image_type) { %>
               <img src="/cat-img/<%= cat.id %>" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid var(--black-border);" alt="<%= cat.name %>" />

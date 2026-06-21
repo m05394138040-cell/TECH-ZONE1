@@ -162,6 +162,64 @@ router.post('/categories/:id/delete', async (req, res, next) => {
   }
 });
 
+// Move category up in sort order
+router.post('/categories/:id/move-up', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const current = await queryOne('SELECT * FROM categories WHERE id = $1', [id]);
+    if (!current) return res.redirect('/admin/categories');
+
+    // Find the category just before this one (lower sort_order)
+    const above = await queryOne(
+      `SELECT * FROM categories
+       WHERE sort_order < $1
+       ORDER BY sort_order DESC, id DESC
+       LIMIT 1`,
+      [current.sort_order]
+    );
+    if (!above) {
+      // Already at the top
+      return res.redirect('/admin/categories');
+    }
+
+    // Swap sort_order values
+    await query('UPDATE categories SET sort_order = $1 WHERE id = $2', [above.sort_order, current.id]);
+    await query('UPDATE categories SET sort_order = $1 WHERE id = $2', [current.sort_order, above.id]);
+    res.redirect('/admin/categories');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Move category down in sort order
+router.post('/categories/:id/move-down', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const current = await queryOne('SELECT * FROM categories WHERE id = $1', [id]);
+    if (!current) return res.redirect('/admin/categories');
+
+    // Find the category just after this one (higher sort_order)
+    const below = await queryOne(
+      `SELECT * FROM categories
+       WHERE sort_order > $1
+       ORDER BY sort_order ASC, id ASC
+       LIMIT 1`,
+      [current.sort_order]
+    );
+    if (!below) {
+      // Already at the bottom
+      return res.redirect('/admin/categories');
+    }
+
+    // Swap sort_order values
+    await query('UPDATE categories SET sort_order = $1 WHERE id = $2', [below.sort_order, current.id]);
+    await query('UPDATE categories SET sort_order = $1 WHERE id = $2', [current.sort_order, below.id]);
+    res.redirect('/admin/categories');
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/categories/:id/update', upload.single('image'), async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
