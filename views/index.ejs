@@ -21,10 +21,14 @@
         <% if (cat.image_type) { %>
           <img src="/cat-img/<%= cat.id %>" class="category-image" alt="<%= cat.name %>" loading="lazy" />
         <% } else { %>
-          <span class="category-icon"><%= cat.icon || '🛍️' %></span>
+          <div class="category-image-fallback">
+            <span class="category-icon"><%= cat.icon || '🛍️' %></span>
+          </div>
         <% } %>
-        <div class="category-name"><%= cat.name %></div>
-        <div class="category-count"><%= cat.product_count %> منتج</div>
+        <div class="category-info">
+          <div class="category-name"><%= cat.name %></div>
+          <div class="category-count"><%= cat.product_count %> منتج</div>
+        </div>
       </a>
     <% }); %>
   </div>
