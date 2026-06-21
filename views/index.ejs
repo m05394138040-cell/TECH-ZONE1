@@ -18,7 +18,11 @@
   <div class="categories-grid">
     <% categories.forEach(function(cat) { %>
       <a href="/category/<%= cat.slug %>" class="category-card">
-        <span class="category-icon"><%= cat.icon || '🛍️' %></span>
+        <% if (cat.image_type) { %>
+          <img src="/cat-img/<%= cat.id %>" class="category-image" alt="<%= cat.name %>" loading="lazy" />
+        <% } else { %>
+          <span class="category-icon"><%= cat.icon || '🛍️' %></span>
+        <% } %>
         <div class="category-name"><%= cat.name %></div>
         <div class="category-count"><%= cat.product_count %> منتج</div>
       </a>

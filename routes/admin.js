@@ -123,7 +123,7 @@ router.get('/categories', async (req, res, next) => {
   }
 });
 
-router.post('/categories', async (req, res, next) => {
+router.post('/categories', upload.single('image'), async (req, res, next) => {
   try {
     const { name, icon } = req.body;
     if (!name || !name.trim()) {
@@ -141,9 +141,11 @@ router.post('/categories', async (req, res, next) => {
       .replace(/\s+/g, '-')
       .substring(0, 80) || `cat-${Date.now()}`;
     const maxOrder = await queryOne('SELECT COALESCE(MAX(sort_order), 0) AS m FROM categories');
+    const imageData = req.file ? req.file.buffer : null;
+    const imageType = req.file ? req.file.mimetype : null;
     await query(
-      'INSERT INTO categories (name, slug, icon, sort_order) VALUES ($1, $2, $3, $4)',
-      [name.trim(), slug, icon || '', (maxOrder?.m || 0) + 1]
+      'INSERT INTO categories (name, slug, icon, image_data, image_type, sort_order) VALUES ($1, $2, $3, $4, $5, $6)',
+      [name.trim(), slug, icon || '', imageData, imageType, (maxOrder?.m || 0) + 1]
     );
     res.redirect('/admin/categories');
   } catch (err) {
@@ -160,12 +162,24 @@ router.post('/categories/:id/delete', async (req, res, next) => {
   }
 });
 
-router.post('/categories/:id/update', async (req, res, next) => {
+router.post('/categories/:id/update', upload.single('image'), async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const { name, icon } = req.body;
-    await query('UPDATE categories SET name = $1, icon = $2 WHERE id = $3',
-      [name.trim(), icon || '', id]);
+    const { name, icon, remove_image } = req.body;
+    if (req.file) {
+      await query(
+        'UPDATE categories SET name = $1, icon = $2, image_data = $3, image_type = $4 WHERE id = $5',
+        [name.trim(), icon || '', req.file.buffer, req.file.mimetype, id]
+      );
+    } else if (remove_image === '1') {
+      await query(
+        'UPDATE categories SET name = $1, icon = $2, image_data = NULL, image_type = NULL WHERE id = $3',
+        [name.trim(), icon || '', id]
+      );
+    } else {
+      await query('UPDATE categories SET name = $1, icon = $2 WHERE id = $3',
+        [name.trim(), icon || '', id]);
+    }
     res.redirect('/admin/categories');
   } catch (err) {
     next(err);

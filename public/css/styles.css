@@ -260,6 +260,18 @@ input:focus, textarea:focus, select:focus {
   filter: drop-shadow(0 2px 8px var(--gold-glow));
 }
 
+.category-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 0 auto 10px;
+  display: block;
+  border: 2px solid var(--gold);
+  box-shadow: 0 4px 12px var(--gold-glow);
+  background: var(--black-card);
+}
+
 .category-name {
   font-size: 16px;
   font-weight: 700;

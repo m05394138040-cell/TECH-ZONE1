@@ -13,7 +13,7 @@ const { queryAll, queryOne } = require('../config/db');
 router.get('/', async (req, res, next) => {
   try {
     const categories = await queryAll(
-      `SELECT c.*,
+      `SELECT c.id, c.name, c.slug, c.icon, c.image_type,
               (SELECT COUNT(*) FROM products p
                 WHERE p.category_id = c.id AND p.available = TRUE) AS product_count
          FROM categories c
@@ -94,6 +94,30 @@ router.get('/img/:id', async (req, res, next) => {
 
     res.set('Content-Type', row.image_type || 'image/jpeg');
     res.set('Cache-Control', 'public, max-age=86400'); // 24h
+    res.send(row.image_data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ===== Category image: /cat-img/:id =====
+router.get('/cat-img/:id', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(404).end();
+    const row = await queryOne('SELECT image_data, image_type FROM categories WHERE id = $1', [id]);
+    if (!row || !row.image_data) {
+      // Empty 1x1 transparent gif (frontend will fall back to emoji)
+      const placeholder = Buffer.from(
+        'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+        'base64'
+      );
+      res.set('Content-Type', 'image/gif');
+      res.set('Cache-Control', 'public, max-age=3600');
+      return res.send(placeholder);
+    }
+    res.set('Content-Type', row.image_type || 'image/jpeg');
+    res.set('Cache-Control', 'public, max-age=86400');
     res.send(row.image_data);
   } catch (err) {
     next(err);

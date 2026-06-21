@@ -5,15 +5,21 @@
 
 <div class="form-section">
   <h2>➕ إضافة قسم جديد</h2>
-  <form method="POST" action="/admin/categories">
-    <div class="form-row cols-2">
+  <form method="POST" action="/admin/categories" enctype="multipart/form-data">
+    <div class="form-row cols-3">
       <div class="form-group">
-        <label for="name">اسم القسم</label>
+        <label for="name">اسم القسم *</label>
         <input type="text" id="name" name="name" required placeholder="مثال: السماعات" />
       </div>
       <div class="form-group">
-        <label for="icon">الأيقونة (إيموجي)</label>
+        <label for="icon">الأيقونة (إيموجي) - اختياري</label>
         <input type="text" id="icon" name="icon" placeholder="🎧" maxlength="4" />
+        <p style="color: var(--gray-muted); font-size: 11px; margin-top: 4px;">يظهر فقط لو ما رفعت صورة</p>
+      </div>
+      <div class="form-group">
+        <label for="image">صورة القسم (اختياري)</label>
+        <input type="file" id="image" name="image" accept="image/*" />
+        <p style="color: var(--gray-muted); font-size: 11px; margin-top: 4px;">JPG, PNG — حد أقصى 5MB</p>
       </div>
     </div>
     <button type="submit" class="btn btn-primary">إضافة القسم</button>
@@ -25,11 +31,11 @@
     <thead>
       <tr>
         <th style="width: 60px;">الترتيب</th>
-        <th style="width: 60px;">الأيقونة</th>
+        <th style="width: 70px;">الأيقونة/الصورة</th>
         <th>اسم القسم</th>
         <th>المعرف (slug)</th>
         <th style="width: 100px;">المنتجات</th>
-        <th style="width: 240px;">إجراءات</th>
+        <th style="width: 380px;">إجراءات</th>
       </tr>
     </thead>
     <tbody>
@@ -39,18 +45,36 @@
       <% categories.forEach(function(cat) { %>
         <tr>
           <td><%= cat.sort_order %></td>
-          <td style="font-size: 24px;"><%= cat.icon || '🛍️' %></td>
+          <td>
+            <% if (cat.image_type) { %>
+              <img src="/cat-img/<%= cat.id %>" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid var(--black-border);" alt="<%= cat.name %>" />
+            <% } else { %>
+              <span style="font-size: 28px;"><%= cat.icon || '🛍️' %></span>
+            <% } %>
+          </td>
           <td><strong style="color: var(--white);"><%= cat.name %></strong></td>
           <td><code style="background: var(--black); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: var(--gray-text);"><%= cat.slug %></code></td>
           <td><span style="color: var(--gold); font-weight: 700;"><%= cat.product_count %></span></td>
           <td class="actions">
-            <form method="POST" action="/admin/categories/<%= cat.id %>/update" style="display: inline-flex; gap: 4px; flex: 1;">
-              <input type="text" name="name" value="<%= cat.name %>" required style="flex: 1; min-width: 0; padding: 6px 8px; font-size: 13px;" />
-              <input type="text" name="icon" value="<%= cat.icon || '' %>" maxlength="4" style="width: 50px; padding: 6px 8px; font-size: 13px;" />
-              <button type="submit" class="btn btn-secondary btn-sm">💾</button>
+            <form method="POST" action="/admin/categories/<%= cat.id %>/update" enctype="multipart/form-data" style="display: flex; gap: 4px; flex-wrap: wrap; flex: 1;">
+              <input type="text" name="name" value="<%= cat.name %>" required style="flex: 2; min-width: 100px; padding: 6px 8px; font-size: 13px;" />
+              <input type="text" name="icon" value="<%= cat.icon || '' %>" maxlength="4" placeholder="🎧" style="width: 50px; padding: 6px 8px; font-size: 13px;" title="إيموجي" />
+              <label style="background: var(--black); border: 1px solid var(--black-border); border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 12px; color: var(--gold); display: inline-flex; align-items: center;" title="رفع صورة جديدة">
+                🖼️
+                <input type="file" name="image" accept="image/*" style="display: none;" />
+              </label>
+              <button type="submit" class="btn btn-secondary btn-sm" title="حفظ">💾</button>
             </form>
+            <% if (cat.image_type) { %>
+              <form method="POST" action="/admin/categories/<%= cat.id %>/update" enctype="multipart/form-data" style="display: inline;" data-confirm="حذف الصورة والعودة للإيموجي؟">
+                <input type="hidden" name="name" value="<%= cat.name %>" />
+                <input type="hidden" name="icon" value="<%= cat.icon || '' %>" />
+                <input type="hidden" name="remove_image" value="1" />
+                <button type="submit" class="btn btn-secondary btn-sm" title="حذف الصورة">🖼️🗑️</button>
+              </form>
+            <% } %>
             <form method="POST" action="/admin/categories/<%= cat.id %>/delete" style="display: inline;" data-confirm="حذف القسم وكل المنتجات داخله؟">
-              <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+              <button type="submit" class="btn btn-danger btn-sm" title="حذف القسم">🗑️</button>
             </form>
           </td>
         </tr>

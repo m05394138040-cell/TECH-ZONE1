@@ -44,9 +44,21 @@ async function createTables() {
       name VARCHAR(100) NOT NULL,
       slug VARCHAR(100) UNIQUE NOT NULL,
       icon VARCHAR(20) DEFAULT '',
+      image_data BYTEA,
+      image_type VARCHAR(50),
       sort_order INT DEFAULT 0,
       created_at TIMESTAMP DEFAULT NOW()
     )
+  `);
+
+  // Migration: add image columns to existing categories table
+  await query(`
+    ALTER TABLE categories
+    ADD COLUMN IF NOT EXISTS image_data BYTEA
+  `);
+  await query(`
+    ALTER TABLE categories
+    ADD COLUMN IF NOT EXISTS image_type VARCHAR(50)
   `);
 
   await query(`

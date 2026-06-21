@@ -81,7 +81,7 @@ app.use((err, req, res, next) => {
 async function ensureSchema() {
   // Auto-create tables if they don't exist (self-healing)
   // This way, even if init-db didn't run, the server bootstraps itself.
-  const { queryOne } = require('./config/db');
+  const { queryOne, query } = require('./config/db');
   const check = await queryOne(
     "SELECT to_regclass('public.categories') AS cat, to_regclass('public.products') AS prod, to_regclass('public.settings') AS set, to_regclass('public.admin_users') AS adm"
   );
@@ -102,6 +102,13 @@ async function ensureSchema() {
       console.error('⚠️  Could not auto-init:', err.message);
     }
   } else {
+    // Run idempotent migrations for new columns
+    try {
+      await query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_data BYTEA');
+      await query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_type VARCHAR(50)');
+    } catch (err) {
+      console.error('⚠️  Migration error:', err.message);
+    }
     console.log('✅ Database schema OK');
   }
 }
