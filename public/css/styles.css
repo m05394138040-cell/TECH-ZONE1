@@ -968,9 +968,6 @@ input:focus, textarea:focus, select:focus {
   animation: ticker-scroll 45s linear infinite;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
-.news-ticker:hover .ticker-text {
-  animation-play-state: paused;
-}
 @keyframes ticker-scroll {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
