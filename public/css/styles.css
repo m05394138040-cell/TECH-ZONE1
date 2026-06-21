@@ -938,37 +938,14 @@ input:focus, textarea:focus, select:focus {
 .news-ticker {
   display: flex;
   align-items: center;
-  gap: 0;
   margin: 20px 0 24px;
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow-md);
   border: 1px solid rgba(212, 175, 55, 0.3);
-  height: 44px;
+  height: 50px;
   position: relative;
-}
-.ticker-label {
-  flex-shrink: 0;
-  width: 50px;
-  height: 100%;
-  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  position: relative;
-  z-index: 2;
-}
-.ticker-label::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: -10px;
-  width: 0;
-  height: 0;
-  border-top: 22px solid transparent;
-  border-bottom: 22px solid transparent;
-  border-left: 10px solid var(--gold-dark);
+  padding: 0 16px;
 }
 .ticker-content {
   flex: 1;
@@ -977,18 +954,19 @@ input:focus, textarea:focus, select:focus {
   height: 100%;
   display: flex;
   align-items: center;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
 }
 .ticker-text {
   display: inline-block;
   white-space: nowrap;
   padding-right: 100%;
-  font-size: 15px;
+  font-family: 'Aref Ruqaa', 'Cairo', serif;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: 0.3px;
-  animation: ticker-scroll 40s linear infinite;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  letter-spacing: 0.5px;
+  animation: ticker-scroll 45s linear infinite;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 .news-ticker:hover .ticker-text {
   animation-play-state: paused;
@@ -1427,5 +1405,5 @@ input:focus, textarea:focus, select:focus {
   .contact-dropdown { min-width: 200px; }
 }
 
-/* Google Font (Cairo) */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+/* Google Fonts (Cairo + Aref Ruqaa for elegant Arabic typography) */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Aref+Ruqaa:wght@400;700&display=swap');

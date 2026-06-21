@@ -8,7 +8,6 @@
 <% if (settings.ticker_enabled === 'true' || !settings.ticker_enabled) { %>
   <% if (settings.ticker_text) { %>
     <div class="news-ticker" style="background: <%= settings.ticker_bg_color || '#0a0a0a' %>;">
-      <div class="ticker-label">📰</div>
       <div class="ticker-content" style="color: <%= settings.ticker_color || '#ffffff' %>;">
         <span class="ticker-text"><%= settings.ticker_text %></span>
       </div>
