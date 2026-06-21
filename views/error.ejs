@@ -1,0 +1,17 @@
+<%- include('partials/header') %>
+
+<div class="empty-state" style="padding: 40px 20px;">
+  <div class="icon">⚠️</div>
+  <h3><%= title || 'خطأ' %></h3>
+  <p style="max-width: 700px; margin: 0 auto;"><%= message %></p>
+  <% if (typeof stack !== 'undefined' && stack) { %>
+    <details style="max-width: 800px; margin: 20px auto; text-align: right; background: var(--black-card); border: 1px solid var(--black-border); border-radius: 8px; padding: 12px;">
+      <summary style="cursor: pointer; color: var(--gold); font-weight: 600;">تفاصيل تقنية (للمطورين)</summary>
+      <pre style="overflow-x: auto; color: var(--gray-text); font-size: 11px; margin-top: 10px; white-space: pre-wrap; word-break: break-all;"><%= stack %></pre>
+    </details>
+  <% } %>
+  <a href="/" class="btn btn-primary" style="margin-top: 20px;">العودة للرئيسية</a>
+  <a href="/admin" class="btn btn-secondary" style="margin-top: 20px;">لوحة التحكم</a>
+</div>
+
+<%- include('partials/footer') %>

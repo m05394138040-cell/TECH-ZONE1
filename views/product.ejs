@@ -1,0 +1,81 @@
+<%- include('partials/header') %>
+
+<div class="breadcrumb">
+  <a href="/">الرئيسية</a>
+  <span class="sep">›</span>
+  <a href="/category/<%= product.category_slug %>"><%= product.category_name %></a>
+  <span class="sep">›</span>
+  <span><%= product.name %></span>
+</div>
+
+<div class="product-detail">
+  <div class="product-detail-image">
+    <% if (product.image_type) { %>
+      <img src="/img/<%= product.id %>" alt="<%= product.name %>" />
+    <% } else { %>
+      <span class="product-image-placeholder" style="font-size: 96px;">📦</span>
+    <% } %>
+  </div>
+
+  <div class="product-detail-info">
+    <span class="category-tag"><%= product.category_name %></span>
+    <h1><%= product.name %></h1>
+
+    <div class="product-detail-price">
+      <span class="amount"><%= parseFloat(product.price).toFixed(2) %></span>
+      <span class="currency">USD</span>
+    </div>
+
+    <div style="margin: 12px 0;">
+      <% if (product.available) { %>
+        <span class="availability-pill in">متوفر</span>
+      <% } else { %>
+        <span class="availability-pill out">غير متوفر حالياً</span>
+      <% } %>
+    </div>
+
+    <% if (product.description) { %>
+      <div class="product-description"><%= product.description %></div>
+    <% } %>
+
+    <% if (product.available && whatsappNumber) { %>
+      <div class="order-box">
+        <div class="order-box-title">🛒 اطلب عبر واتساب</div>
+
+        <input type="hidden" id="unit-price" value="<%= product.price %>" />
+        <input type="hidden" id="product-name" value="<%= product.name %>" />
+        <input type="hidden" id="category-name" value="<%= product.category_name %>" />
+
+        <div class="qty-row">
+          <span class="qty-label">الكمية:</span>
+          <div class="qty-control">
+            <button type="button" id="qty-minus" class="qty-btn">−</button>
+            <input type="number" id="qty-input" class="qty-input" value="1" min="1" max="999" />
+            <button type="button" id="qty-plus" class="qty-btn">+</button>
+          </div>
+        </div>
+
+        <div class="total-row">
+          <span class="total-label">المجموع:</span>
+          <span class="total-value">$<span id="total-value"><%= parseFloat(product.price).toFixed(2) %></span></span>
+        </div>
+
+        <a id="wa-btn" class="btn-wa" href="#" target="_blank" rel="noopener" data-phone="<%= whatsappNumber %>">
+          <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M16 0C7.2 0 0 7.2 0 16c0 2.8.8 5.5 2.2 7.9L0 32l8.3-2.1C10.6 31.2 13.3 32 16 32c8.8 0 16-7.2 16-16S24.8 0 16 0zm9.3 22.6c-.4 1.1-2 2.1-3.3 2.4-.8.2-1.9.3-5.5-1.2-4.6-1.9-7.6-6.5-7.8-6.8-.2-.3-1.9-2.5-1.9-4.7 0-2.3 1.2-3.4 1.6-3.9.4-.4.9-.6 1.2-.6h.9c.3 0 .7-.1 1 .7.4 1 1.3 3.4 1.4 3.6.1.3.2.6 0 .9-.2.4-.3.6-.6.9-.3.3-.6.7-.9 1-.3.3-.6.6-.3 1.2.3.6 1.4 2.3 3 3.7 2.1 1.8 3.8 2.4 4.4 2.7.6.3.9.2 1.2-.2.3-.4 1.3-1.5 1.7-2 .3-.5.7-.4 1.1-.2.4.2 2.9 1.4 3.4 1.6.5.3.9.4 1 .6.2.3.2 1.2-.2 2.3z"/></svg>
+          <span>اطلب عبر واتساب</span>
+        </a>
+      </div>
+    <% } else if (!product.available) { %>
+      <div class="order-box" style="text-align: center;">
+        <div class="order-box-title" style="justify-content: center;">⚠️ المنتج غير متوفر حالياً</div>
+        <p style="color: var(--gray-text); font-size: 14px;">يرجى التواصل لاحقاً أو تصفح منتجات أخرى</p>
+      </div>
+    <% } else { %>
+      <div class="order-box" style="text-align: center;">
+        <p class="wa-disabled-note">رقم الواتساب غير محدد بعد. يرجى المحاولة لاحقاً.</p>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+
+<div class="breadcrumb">
+  <a href="/">الرئيسية</a>
+  <span class="sep">›</span>
+  <span><%= category.name %></span>
+</div>
+
+<section class="hero" style="padding: 16px 0 8px;">
+  <h1 style="font-size: 28px;">
+    <span style="font-size: 36px; margin-left: 8px;"><%= category.icon || '🛍️' %></span>
+    <%= category.name %>
+  </h1>
+  <div class="gold-divider"></div>
+</section>
+
+<% if (products.length === 0) { %>
+  <div class="empty-state">
+    <div class="icon">📭</div>
+    <h3>لا توجد منتجات في هذا القسم بعد</h3>
+    <p>سيتم إضافة المنتجات قريباً</p>
+  </div>
+<% } else { %>
+  <div class="products-grid">
+    <% products.forEach(function(p) { %>
+      <a href="/product/<%= p.id %>" class="product-card">
+        <div class="product-image-wrap">
+          <% if (p.image_type) { %>
+            <img src="/img/<%= p.id %>" alt="<%= p.name %>" loading="lazy" data-fallback />
+          <% } else { %>
+            <span class="product-image-placeholder">📦</span>
+          <% } %>
+          <% if (!p.available) { %>
+            <span class="badge-unavailable">غير متوفر</span>
+          <% } %>
+        </div>
+        <div class="product-body">
+          <div class="product-name"><%= p.name %></div>
+          <div class="product-price">
+            <%= parseFloat(p.price).toFixed(2) %>
+            <span class="currency">$</span>
+          </div>
+        </div>
+      </a>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

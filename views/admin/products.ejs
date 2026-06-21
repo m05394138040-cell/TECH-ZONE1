@@ -1,0 +1,66 @@
+<%- include('_head') %>
+
+<% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+
+<div style="margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+  <a href="/admin/products/new" class="btn btn-primary">➕ إضافة منتج جديد</a>
+  <span style="color: var(--gray-muted); font-size: 13px;">إجمالي: <strong style="color: var(--gold);"><%= products.length %></strong> منتج</span>
+</div>
+
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th style="width: 70px;">صورة</th>
+        <th>اسم المنتج</th>
+        <th>القسم</th>
+        <th>السعر</th>
+        <th>الحالة</th>
+        <th style="width: 220px;">إجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (products.length === 0) { %>
+        <tr><td colspan="6" style="text-align: center; color: var(--gray-muted); padding: 40px;">لا توجد منتجات بعد — ابدأ بإضافة منتج جديد</td></tr>
+      <% } %>
+      <% products.forEach(function(p) { %>
+        <tr>
+          <td>
+            <% if (p.image_type) { %>
+              <img src="/img/<%= p.id %>" class="thumb" alt="<%= p.name %>" />
+            <% } else { %>
+              <span class="thumb-placeholder">📦</span>
+            <% } %>
+          </td>
+          <td>
+            <strong style="color: var(--white);"><%= p.name %></strong>
+            <% if (p.description) { %>
+              <div style="color: var(--gray-muted); font-size: 12px; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;"><%= p.description %></div>
+            <% } %>
+          </td>
+          <td><span style="color: var(--gold); font-size: 13px;"><%= p.category_name %></span></td>
+          <td><strong style="color: var(--gold);">$<%= parseFloat(p.price).toFixed(2) %></strong></td>
+          <td>
+            <% if (p.available) { %>
+              <span class="availability-pill in">متوفر</span>
+            <% } else { %>
+              <span class="availability-pill out">غير متوفر</span>
+            <% } %>
+          </td>
+          <td class="actions">
+            <a href="/product/<%= p.id %>" target="_blank" class="btn btn-secondary btn-sm">👁</a>
+            <a href="/admin/products/<%= p.id %>/edit" class="btn btn-primary btn-sm">✏️</a>
+            <form method="POST" action="/admin/products/<%= p.id %>/toggle" style="display: inline;">
+              <button type="submit" class="btn btn-secondary btn-sm" title="تبديل الحالة"><%= p.available ? '🚫' : '✅' %></button>
+            </form>
+            <form method="POST" action="/admin/products/<%= p.id %>/delete" style="display: inline;" data-confirm="حذف هذا المنتج نهائياً؟">
+              <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('_foot') %>

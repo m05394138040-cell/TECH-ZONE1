@@ -1,0 +1,43 @@
+# Render Blueprint - One-click deployment
+# Usage: 
+#   1. Push this code to a GitHub repo
+#   2. In Render dashboard: "New" > "Blueprint" > Connect your repo
+#   3. Render will auto-create the web service + database
+#   4. After deploy, the web service will auto-run `npm run init-db`
+
+services:
+  - type: pserv
+    name: tech-zone
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tech-zone-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: GH1899
+      - key: ADMIN_PASSWORD
+        value: "266641"
+      - key: DEFAULT_WHATSAPP
+        value: "+962790000000"
+      - key: DEFAULT_SITE_NAME
+        value: "TECH ZONE"
+
+databases:
+  - name: tech-zone-db
+    plan: free
+    databaseName: techzone
+    user: techzone
+    region: oregon

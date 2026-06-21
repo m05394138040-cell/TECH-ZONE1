@@ -1,0 +1,29 @@
+<%- include('partials/header') %>
+
+<section class="hero">
+  <h1><%= siteName %></h1>
+  <div class="gold-divider"></div>
+  <p>اكسسوارات الأجهزة الذكية — جميع المنتجات متوفرة بأسعار تنافسية</p>
+</section>
+
+<h2 class="section-title">تصفح الأقسام</h2>
+
+<% if (categories.length === 0) { %>
+  <div class="empty-state">
+    <div class="icon">📦</div>
+    <h3>لا توجد أقسام بعد</h3>
+    <p>قم بإضافة الأقسام من لوحة التحكم</p>
+  </div>
+<% } else { %>
+  <div class="categories-grid">
+    <% categories.forEach(function(cat) { %>
+      <a href="/category/<%= cat.slug %>" class="category-card">
+        <span class="category-icon"><%= cat.icon || '🛍️' %></span>
+        <div class="category-name"><%= cat.name %></div>
+        <div class="category-count"><%= cat.product_count %> منتج</div>
+      </a>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('partials/footer') %>

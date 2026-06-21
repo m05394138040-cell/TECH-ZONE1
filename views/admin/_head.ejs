@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title><%= title %> | لوحة التحكم - <%= siteName %></title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+<div class="admin-layout">
+  <aside class="admin-sidebar">
+    <span class="admin-logo"><%= siteName %></span>
+    <span class="admin-tagline">لوحة التحكم</span>
+
+    <ul class="admin-nav">
+      <li><a href="/admin" class="<%= (typeof active !== 'undefined' && active === 'dashboard') ? 'active' : '' %>"><span class="icon">📊</span> الرئيسية</a></li>
+      <li><a href="/admin/categories" class="<%= (typeof active !== 'undefined' && active === 'categories') ? 'active' : '' %>"><span class="icon">📂</span> الأقسام</a></li>
+      <li><a href="/admin/products" class="<%= (typeof active !== 'undefined' && active === 'products') ? 'active' : '' %>"><span class="icon">📦</span> المنتجات</a></li>
+      <li><a href="/admin/products/new" class="<%= (typeof active !== 'undefined' && active === 'product-new') ? 'active' : '' %>"><span class="icon">➕</span> إضافة منتج</a></li>
+      <li><a href="/admin/settings" class="<%= (typeof active !== 'undefined' && active === 'settings') ? 'active' : '' %>"><span class="icon">⚙️</span> الإعدادات</a></li>
+      <li style="margin-top: 20px; border-top: 1px solid var(--black-border); padding-top: 10px;">
+        <a href="/" target="_blank"><span class="icon">🌐</span> عرض الموقع</a>
+      </li>
+      <li><a href="/admin/logout"><span class="icon">🚪</span> تسجيل خروج</a></li>
+    </ul>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-header">
+      <h1><%= title %></h1>
+      <div class="admin-user">
+        <span>مرحباً، <strong style="color: var(--gold);"><%= adminUsername %></strong></span>
+      </div>
+    </div>

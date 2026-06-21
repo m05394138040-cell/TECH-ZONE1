@@ -1,0 +1,43 @@
+<%- include('_head') %>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value"><%= stats.categories %></div>
+    <div class="stat-label">الأقسام</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value"><%= stats.products %></div>
+    <div class="stat-label">إجمالي المنتجات</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="-webkit-text-fill-color: #2ecc71; background: none;"><%= stats.available %></div>
+    <div class="stat-label">منتجات متوفرة</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" style="-webkit-text-fill-color: #ff6b6b; background: none;"><%= stats.unavailable %></div>
+    <div class="stat-label">منتجات غير متوفرة</div>
+  </div>
+</div>
+
+<div class="form-section">
+  <h2>🚀 إجراءات سريعة</h2>
+  <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+    <a href="/admin/products/new" class="btn btn-primary">➕ إضافة منتج جديد</a>
+    <a href="/admin/products" class="btn btn-secondary">📦 عرض كل المنتجات</a>
+    <a href="/admin/categories" class="btn btn-secondary">📂 إدارة الأقسام</a>
+    <a href="/admin/settings" class="btn btn-secondary">⚙️ الإعدادات</a>
+    <a href="/" target="_blank" class="btn btn-secondary">🌐 عرض الموقع</a>
+  </div>
+</div>
+
+<div class="form-section">
+  <h2>ℹ️ معلومات النظام</h2>
+  <p style="color: var(--gray-text); line-height: 1.8; font-size: 14px;">
+    <strong style="color: var(--gold);">قاعدة البيانات:</strong> PostgreSQL — تخزين دائم، البيانات آمنة من إعادة التشغيل<br>
+    <strong style="color: var(--gold);">الصور:</strong> تُخزن داخل قاعدة البيانات — لن تنحذف أبداً<br>
+    <strong style="color: var(--gold);">المصادقة:</strong> JWT + bcrypt — كلمة المرور مشفرة<br>
+    <strong style="color: var(--gold);">رابط الموقع:</strong> شارك الرابط مع زبائنك لعرض المنتجات فقط
+  </p>
+</div>
+
+<%- include('_foot') %>

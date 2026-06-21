@@ -1,0 +1,61 @@
+<%- include('_head') %>
+
+<% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+<% if (success) { %><div class="success-msg"><%= success %></div><% } %>
+
+<form method="POST" action="/admin/settings" enctype="multipart/form-data">
+
+  <div class="form-section">
+    <h2>📱 إعدادات الطلب عبر واتساب</h2>
+    <div class="form-group">
+      <label for="whatsapp_number">رقم الواتساب</label>
+      <input type="text" id="whatsapp_number" name="whatsapp_number" value="<%= settings.whatsapp_number || '' %>" placeholder="+962790000000" dir="ltr" />
+      <p style="color: var(--gray-muted); font-size: 12px; margin-top: 6px;">
+        يُستخدم في زر "اطلب عبر واتساب". استخدم الصيغة الدولية: رمز الدولة + الرقم (بدون + أو 00 رح يتجاهلوا).
+      </p>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2>🏷️ اسم الموقع والشعار</h2>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="site_name">اسم الموقع</label>
+        <input type="text" id="site_name" name="site_name" value="<%= settings.site_name || 'TECH ZONE' %>" />
+      </div>
+      <div class="form-group">
+        <label for="logo_text">نص الشعار (إذا ما في صورة)</label>
+        <input type="text" id="logo_text" name="logo_text" value="<%= settings.logo_text || settings.site_name || 'TECH ZONE' %>" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="logo">شعار صورة (اختياري)</label>
+      <% if (settings.logo_image) { %>
+        <div style="margin-bottom: 12px;">
+          <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 8px;">الشعار الحالي:</p>
+          <img src="/logo" style="max-width: 200px; max-height: 100px; border-radius: 8px; border: 1px solid var(--black-border); background: var(--black); padding: 8px;" alt="logo" />
+          <label class="checkbox-row" style="margin-top: 12px;">
+            <input type="checkbox" name="remove_logo" value="1" />
+            <span style="color: #ff6b6b;">حذف الصورة والعودة للنص</span>
+          </label>
+        </div>
+      <% } %>
+      <input type="file" id="logo" name="logo" accept="image/*" />
+      <p style="color: var(--gray-muted); font-size: 12px; margin-top: 6px;">PNG شفاف أفضل للشعارات — حد أقصى 5MB</p>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px;">
+    <button type="submit" class="btn btn-primary">💾 حفظ الإعدادات</button>
+  </div>
+</form>
+
+<div class="form-section" style="margin-top: 24px;">
+  <h2>🔒 معلومات الحساب</h2>
+  <p style="color: var(--gray-text); line-height: 1.8; font-size: 14px;">
+    لتغيير اسم المستخدم أو كلمة المرور، تواصل مع المطوّر. (هاد الإصدار ما يدعم تغيير بيانات الدخول من اللوحة.)
+  </p>
+</div>
+
+<%- include('_foot') %>
