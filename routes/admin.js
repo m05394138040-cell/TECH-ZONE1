@@ -335,9 +335,28 @@ router.get('/settings', async (req, res, next) => {
 router.post('/settings', upload.single('logo'), async (req, res, next) => {
   try {
     const { whatsapp_number, site_name, logo_text, remove_logo } = req.body;
+    const socialFields = [
+      'social_youtube',
+      'social_facebook',
+      'social_instagram',
+      'social_twitter',
+      'social_tiktok',
+      'social_whatsapp',
+    ];
+
     await setSetting('whatsapp_number', (whatsapp_number || '').trim());
     await setSetting('site_name', (site_name || 'TECH ZONE').trim());
     await setSetting('logo_text', (logo_text || site_name || 'TECH ZONE').trim());
+
+    // Save social media URLs
+    for (const field of socialFields) {
+      let value = (req.body[field] || '').trim();
+      // Auto-prepend https:// if missing
+      if (value && !value.match(/^https?:\/\//i)) {
+        value = 'https://' + value;
+      }
+      await setSetting(field, value);
+    }
 
     if (req.file) {
       // store logo as base64

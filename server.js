@@ -106,6 +106,23 @@ async function ensureSchema() {
     try {
       await query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_data BYTEA');
       await query('ALTER TABLE categories ADD COLUMN IF NOT EXISTS image_type VARCHAR(50)');
+
+      // Ensure social media settings exist
+      const socialSettings = [
+        ['social_youtube', ''],
+        ['social_facebook', ''],
+        ['social_instagram', ''],
+        ['social_twitter', ''],
+        ['social_tiktok', ''],
+        ['social_whatsapp', ''],
+      ];
+      for (const [key, value] of socialSettings) {
+        await query(
+          `INSERT INTO settings (key, value) VALUES ($1, $2)
+           ON CONFLICT (key) DO NOTHING`,
+          [key, value]
+        );
+      }
     } catch (err) {
       console.error('⚠️  Migration error:', err.message);
     }

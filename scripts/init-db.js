@@ -61,6 +61,23 @@ async function createTables() {
     ADD COLUMN IF NOT EXISTS image_type VARCHAR(50)
   `);
 
+  // Add social media settings
+  const socialSettings = [
+    ['social_youtube', ''],
+    ['social_facebook', ''],
+    ['social_instagram', ''],
+    ['social_twitter', ''],
+    ['social_tiktok', ''],
+    ['social_whatsapp', ''],
+  ];
+  for (const [key, value] of socialSettings) {
+    await query(
+      `INSERT INTO settings (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO NOTHING`,
+      [key, value]
+    );
+  }
+
   await query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,

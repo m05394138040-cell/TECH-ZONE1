@@ -46,6 +46,46 @@
     </div>
   </div>
 
+  <div class="form-section">
+    <h2>🔗 روابط التواصل الاجتماعي</h2>
+    <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
+      حط روابط حساباتك الرسمية. اللي تخلّيه فاضي رح يختفي من الفوتر.
+    </p>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="social_facebook">📘 فيسبوك</label>
+        <input type="text" id="social_facebook" name="social_facebook" value="<%= settings.social_facebook || '' %>" placeholder="https://facebook.com/your-page" dir="ltr" />
+      </div>
+      <div class="form-group">
+        <label for="social_instagram">📷 انستغرام</label>
+        <input type="text" id="social_instagram" name="social_instagram" value="<%= settings.social_instagram || '' %>" placeholder="https://instagram.com/your-page" dir="ltr" />
+      </div>
+    </div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="social_youtube">▶️ يوتيوب</label>
+        <input type="text" id="social_youtube" name="social_youtube" value="<%= settings.social_youtube || '' %>" placeholder="https://youtube.com/@your-channel" dir="ltr" />
+      </div>
+      <div class="form-group">
+        <label for="social_twitter">🐦 تويتر / X</label>
+        <input type="text" id="social_twitter" name="social_twitter" value="<%= settings.social_twitter || '' %>" placeholder="https://x.com/your-handle" dir="ltr" />
+      </div>
+    </div>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="social_tiktok">🎵 تيك توك</label>
+        <input type="text" id="social_tiktok" name="social_tiktok" value="<%= settings.social_tiktok || '' %>" placeholder="https://tiktok.com/@your-handle" dir="ltr" />
+      </div>
+      <div class="form-group">
+        <label for="social_whatsapp">💬 واتساب (قناة/مجموعة)</label>
+        <input type="text" id="social_whatsapp" name="social_whatsapp" value="<%= settings.social_whatsapp || '' %>" placeholder="https://whatsapp.com/channel/..." dir="ltr" />
+      </div>
+    </div>
+  </div>
+
   <div style="display: flex; gap: 12px;">
     <button type="submit" class="btn btn-primary">💾 حفظ الإعدادات</button>
   </div>
