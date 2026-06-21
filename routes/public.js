@@ -9,6 +9,15 @@ const express = require('express');
 const router = express.Router();
 const { queryAll, queryOne } = require('../config/db');
 
+// ===== Contact page =====
+router.get('/contact', async (req, res, next) => {
+  try {
+    res.render('contact', { title: 'تواصل معنا' });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ===== Home: list categories =====
 router.get('/', async (req, res, next) => {
   try {
