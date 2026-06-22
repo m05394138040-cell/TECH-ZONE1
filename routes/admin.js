@@ -200,7 +200,7 @@ router.get('/wholesale-users', async (req, res, next) => {
       'SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC'
     );
     res.render('admin/wholesale-users', {
-      title: 'تجار الجملة',
+      title: 'أصحاب المحلات',
       users,
       error: null,
       success: null,
@@ -218,7 +218,7 @@ router.post('/wholesale-users', async (req, res, next) => {
     if (!username || !password) {
       const users = await queryAll('SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC');
       return res.render('admin/wholesale-users', {
-        title: 'تجار الجملة',
+        title: 'أصحاب المحلات',
         users,
         error: 'اسم المستخدم وكلمة المرور مطلوبين',
         success: null,
@@ -228,7 +228,7 @@ router.post('/wholesale-users', async (req, res, next) => {
     if (password.length < 4) {
       const users = await queryAll('SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC');
       return res.render('admin/wholesale-users', {
-        title: 'تجار الجملة',
+        title: 'أصحاب المحلات',
         users,
         error: 'كلمة المرور قصيرة جداً (4 أحرف على الأقل)',
         success: null,
@@ -247,7 +247,7 @@ router.post('/wholesale-users', async (req, res, next) => {
     if (err.code === '23505') {
       const users = await queryAll('SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC');
       return res.render('admin/wholesale-users', {
-        title: 'تجار الجملة',
+        title: 'أصحاب المحلات',
         users,
         error: 'اسم المستخدم موجود مسبقاً',
         success: null,

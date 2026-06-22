@@ -22,7 +22,7 @@ router.get('/wholesale-login', (req, res) => {
       }
     } catch {}
   }
-  res.render('wholesale-login', { title: 'دخول تجار الجملة', error: null, success: null });
+  res.render('wholesale-login', { title: 'دخول صاحب المحل', error: null, success: null });
 });
 
 // Handle login
@@ -31,7 +31,7 @@ router.post('/wholesale-login', async (req, res, next) => {
     const { username, password } = req.body;
     if (!username || !password) {
       return res.render('wholesale-login', {
-        title: 'دخول تجار الجملة',
+        title: 'دخول صاحب المحل',
         error: 'يرجى إدخال اسم المستخدم وكلمة المرور',
         success: null,
       });
@@ -44,7 +44,7 @@ router.post('/wholesale-login', async (req, res, next) => {
 
     if (!user || !user.is_active) {
       return res.render('wholesale-login', {
-        title: 'دخول تجار الجملة',
+        title: 'دخول صاحب المحل',
         error: 'اسم المستخدم أو كلمة المرور غير صحيحة',
         success: null,
       });
@@ -53,7 +53,7 @@ router.post('/wholesale-login', async (req, res, next) => {
     const ok = await bcrypt.compare(password, user.password_hash);
     if (!ok) {
       return res.render('wholesale-login', {
-        title: 'دخول تجار الجملة',
+        title: 'دخول صاحب المحل',
         error: 'اسم المستخدم أو كلمة المرور غير صحيحة',
         success: null,
       });
