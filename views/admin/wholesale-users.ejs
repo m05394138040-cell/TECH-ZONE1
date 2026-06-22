@@ -1,0 +1,88 @@
+<%- include('_head') %>
+
+<% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+<% if (success) { %><div class="success-msg"><%= success %></div><% } %>
+
+<div class="form-section">
+  <h2>➕ إضافة تاجر جملة جديد</h2>
+  <form method="POST" action="/admin/wholesale-users">
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="username">اسم المستخدم *</label>
+        <input type="text" id="username" name="username" required placeholder="مثال: shop_ali" />
+      </div>
+      <div class="form-group">
+        <label for="password">كلمة المرور *</label>
+        <input type="password" id="password" name="password" required placeholder="4 أحرف على الأقل" />
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="name">الاسم الكامل</label>
+        <input type="text" id="name" name="name" placeholder="مثال: علي أحمد" />
+      </div>
+      <div class="form-group">
+        <label for="phone">رقم الهاتف</label>
+        <input type="text" id="phone" name="phone" placeholder="+90 555 123 4567" dir="ltr" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="notes">ملاحظات</label>
+      <textarea id="notes" name="notes" rows="2" placeholder="ملاحظات اختيارية"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">➕ إضافة التاجر</button>
+  </form>
+</div>
+
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>اسم المستخدم</th>
+        <th>الاسم</th>
+        <th>الهاتف</th>
+        <th>الحالة</th>
+        <th>آخر دخول</th>
+        <th style="width: 280px;">إجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (users.length === 0) { %>
+        <tr><td colspan="6" style="text-align: center; color: var(--gray-muted); padding: 40px;">لا يوجد تجار جملة بعد</td></tr>
+      <% } %>
+      <% users.forEach(function(u) { %>
+        <tr>
+          <td><strong style="color: var(--gold);"><%= u.username %></strong></td>
+          <td><%= u.name || '—' %></td>
+          <td dir="ltr"><%= u.phone || '—' %></td>
+          <td>
+            <% if (u.is_active) { %>
+              <span class="availability-pill in">فعّال</span>
+            <% } else { %>
+              <span class="availability-pill out">موقوف</span>
+            <% } %>
+          </td>
+          <td style="font-size: 12px; color: #aaa;">
+            <%= u.last_login ? new Date(u.last_login).toLocaleString('ar') : 'لم يدخل بعد' %>
+          </td>
+          <td class="actions">
+            <form method="POST" action="/admin/wholesale-users/<%= u.id %>/update" style="display: flex; gap: 4px; flex-wrap: wrap; flex: 1;">
+              <input type="text" name="name" value="<%= u.name || '' %>" placeholder="الاسم" style="flex: 1; min-width: 80px; padding: 6px 8px; font-size: 12px;" />
+              <input type="password" name="password" placeholder="كلمة مرور جديدة (اختياري)" style="flex: 1; min-width: 100px; padding: 6px 8px; font-size: 12px;" />
+              <label class="checkbox-row" style="padding: 4px 8px; font-size: 12px;">
+                <input type="checkbox" name="is_active" <%= u.is_active ? 'checked' : '' %> />
+                <span>فعّال</span>
+              </label>
+              <button type="submit" class="btn btn-secondary btn-sm" title="حفظ">💾</button>
+            </form>
+            <form method="POST" action="/admin/wholesale-users/<%= u.id %>/delete" style="display: inline;" data-confirm="حذف هذا التاجر نهائياً؟">
+              <button type="submit" class="btn btn-danger btn-sm" title="حذف">🗑️</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('_foot') %>

@@ -93,6 +93,37 @@ async function createTables() {
     );
   }
 
+  // Wholesale currency settings
+  const wholesaleSettings = [
+    ['wholesale_currency', 'USD'],
+    ['wholesale_symbol', '$'],
+    ['retail_currency', 'TRY'],
+    ['retail_symbol', '₺'],
+    ['exchange_rate', '32'],
+  ];
+  for (const [key, value] of wholesaleSettings) {
+    await query(
+      `INSERT INTO settings (key, value) VALUES ($1, $2)
+       ON CONFLICT (key) DO NOTHING`,
+      [key, value]
+    );
+  }
+
+  // Wholesale users table
+  await query(`
+    CREATE TABLE IF NOT EXISTS wholesale_users (
+      id SERIAL PRIMARY KEY,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      name VARCHAR(100),
+      phone VARCHAR(50),
+      notes TEXT,
+      is_active BOOLEAN DEFAULT TRUE,
+      last_login TIMESTAMP,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+
   await query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,

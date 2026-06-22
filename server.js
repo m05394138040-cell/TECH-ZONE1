@@ -17,10 +17,12 @@ const cookieParser = require('cookie-parser');
 
 const { testConnection } = require('./config/db');
 const { attachAdminToViews } = require('./middleware/auth');
+const { attachWholesaleToViews } = require('./middleware/wholesaleAuth');
 const { getAllSettings } = require('./config/settings');
 
 const publicRoutes = require('./routes/public');
 const adminRoutes = require('./routes/admin');
+const wholesaleRoutes = require('./routes/wholesale');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,6 +39,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Attach admin status to all views
 app.use(attachAdminToViews);
+// Attach wholesale status to all views
+app.use(attachWholesaleToViews);
 
 // Make settings available to all views
 app.use(async (req, res, next) => {
@@ -44,6 +48,23 @@ app.use(async (req, res, next) => {
     res.locals.settings = await getAllSettings();
     res.locals.siteName = res.locals.settings.site_name || 'TECH ZONE';
     res.locals.whatsappNumber = res.locals.settings.whatsapp_number || '';
+
+    // Currency helpers for views
+    const rate = parseFloat(res.locals.settings.exchange_rate) || 32;
+    res.locals.exchangeRate = rate;
+    res.locals.wholesaleSymbol = res.locals.settings.wholesale_symbol || '$';
+    res.locals.retailSymbol = res.locals.settings.retail_symbol || '₺';
+    // Convert USD price to local display price
+    res.locals.formatPrice = (usdPrice) => {
+      if (res.locals.isWholesale) {
+        // Wholesale customers see USD price
+        return parseFloat(usdPrice).toFixed(2) + ' ' + res.locals.wholesaleSymbol;
+      } else {
+        // Visitors see converted price (USD * exchange_rate)
+        const converted = (parseFloat(usdPrice) * rate).toFixed(2);
+        return converted + ' ' + res.locals.retailSymbol;
+      }
+    };
     next();
   } catch (err) {
     next(err);
@@ -52,6 +73,7 @@ app.use(async (req, res, next) => {
 
 // ===== Routes =====
 app.use('/', publicRoutes);
+app.use('/', wholesaleRoutes);
 app.use('/admin', adminRoutes);
 
 // ===== 404 =====
@@ -138,6 +160,37 @@ async function ensureSchema() {
           [key, value]
         );
       }
+
+      // Ensure wholesale settings exist
+      const wholesaleSettings = [
+        ['wholesale_currency', 'USD'],
+        ['wholesale_symbol', '$'],
+        ['retail_currency', 'TRY'],
+        ['retail_symbol', '₺'],
+        ['exchange_rate', '32'],
+      ];
+      for (const [key, value] of wholesaleSettings) {
+        await query(
+          `INSERT INTO settings (key, value) VALUES ($1, $2)
+           ON CONFLICT (key) DO NOTHING`,
+          [key, value]
+        );
+      }
+
+      // Ensure wholesale users table exists
+      await query(`
+        CREATE TABLE IF NOT EXISTS wholesale_users (
+          id SERIAL PRIMARY KEY,
+          username VARCHAR(50) UNIQUE NOT NULL,
+          password_hash VARCHAR(255) NOT NULL,
+          name VARCHAR(100),
+          phone VARCHAR(50),
+          notes TEXT,
+          is_active BOOLEAN DEFAULT TRUE,
+          last_login TIMESTAMP,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
     } catch (err) {
       console.error('⚠️  Migration error:', err.message);
     }

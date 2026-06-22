@@ -36,10 +36,7 @@
         </div>
         <div class="product-body">
           <div class="product-name"><%= p.name %></div>
-          <div class="product-price">
-            <%= parseFloat(p.price).toFixed(2) %>
-            <span class="currency">$</span>
-          </div>
+          <div class="product-price"><%= formatPrice(p.price) %></div>
         </div>
       </a>
     <% }); %>

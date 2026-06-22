@@ -18,10 +18,12 @@
     const productName = document.getElementById('product-name').value || '';
     const categoryName = document.getElementById('category-name').value || '';
     const whatsappNumber = (waBtn.dataset.phone || '').replace(/[^\d]/g, '');
-
-    function formatUSD(n) {
-      return n.toFixed(2);
-    }
+    // Read currency settings from data attributes
+    const currencySymbol = waBtn.dataset.currencySymbol || '$';
+    const isWholesale = waBtn.dataset.isWholesale === 'true';
+    const exchangeRate = parseFloat(waBtn.dataset.exchangeRate) || 1;
+    const displayPrice = isWholesale ? pricePerUnit : pricePerUnit * exchangeRate;
+    const formatPrice = (n) => n.toFixed(2);
 
     function updateTotal() {
       let qty = parseInt(qtyInput.value, 10);
@@ -33,8 +35,8 @@
         qty = 999;
         qtyInput.value = 999;
       }
-      const total = qty * pricePerUnit;
-      totalValueEl.textContent = formatUSD(total);
+      const total = qty * displayPrice;
+      totalValueEl.textContent = formatPrice(total);
 
       // Build WhatsApp message
       const lines = [
@@ -42,9 +44,9 @@
         '',
         `📦 المنتج: ${productName}`,
         `📂 القسم: ${categoryName}`,
-        `💵 سعر القطعة: $${formatUSD(pricePerUnit)}`,
+        `💵 سعر القطعة: ${formatPrice(displayPrice)} ${currencySymbol}`,
         `🔢 الكمية: ${qty}`,
-        `💰 المجموع الكلي: $${formatUSD(total)}`,
+        `💰 المجموع الكلي: ${formatPrice(total)} ${currencySymbol}`,
         '',
         'أرجو تأكيد توفره وتفاصيل التوصيل. شكراً!',
       ];

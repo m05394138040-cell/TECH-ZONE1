@@ -191,7 +191,106 @@ router.post('/categories/:id/move-up', async (req, res, next) => {
   }
 });
 
-// Move category down in sort order
+// ===== Wholesale Users Management =====
+
+// List all wholesale users
+router.get('/wholesale-users', async (req, res, next) => {
+  try {
+    const users = await queryAll(
+      'SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC'
+    );
+    res.render('admin/wholesale-users', {
+      title: 'تجار الجملة',
+      users,
+      error: null,
+      success: null,
+      active: 'wholesale-users',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Create a new wholesale user
+router.post('/wholesale-users', async (req, res, next) => {
+  try {
+    const { username, password, name, phone, notes } = req.body;
+    if (!username || !password) {
+      const users = await queryAll('SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC');
+      return res.render('admin/wholesale-users', {
+        title: 'تجار الجملة',
+        users,
+        error: 'اسم المستخدم وكلمة المرور مطلوبين',
+        success: null,
+        active: 'wholesale-users',
+      });
+    }
+    if (password.length < 4) {
+      const users = await queryAll('SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC');
+      return res.render('admin/wholesale-users', {
+        title: 'تجار الجملة',
+        users,
+        error: 'كلمة المرور قصيرة جداً (4 أحرف على الأقل)',
+        success: null,
+        active: 'wholesale-users',
+      });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    await query(
+      `INSERT INTO wholesale_users (username, password_hash, name, phone, notes)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [username.trim(), hash, name || null, phone || null, notes || null]
+    );
+    res.redirect('/admin/wholesale-users');
+  } catch (err) {
+    if (err.code === '23505') {
+      const users = await queryAll('SELECT id, username, name, phone, is_active, last_login, created_at FROM wholesale_users ORDER BY created_at DESC');
+      return res.render('admin/wholesale-users', {
+        title: 'تجار الجملة',
+        users,
+        error: 'اسم المستخدم موجود مسبقاً',
+        success: null,
+        active: 'wholesale-users',
+      });
+    }
+    next(err);
+  }
+});
+
+// Update a wholesale user
+router.post('/wholesale-users/:id/update', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { name, phone, notes, password, is_active } = req.body;
+
+    if (password && password.length >= 4) {
+      const hash = await bcrypt.hash(password, 10);
+      await query(
+        `UPDATE wholesale_users SET name = $1, phone = $2, notes = $3, is_active = $4, password_hash = $5 WHERE id = $6`,
+        [name || null, phone || null, notes || null, is_active === 'on' || is_active === 'true', hash, id]
+      );
+    } else {
+      await query(
+        `UPDATE wholesale_users SET name = $1, phone = $2, notes = $3, is_active = $4 WHERE id = $5`,
+        [name || null, phone || null, notes || null, is_active === 'on' || is_active === 'true', id]
+      );
+    }
+    res.redirect('/admin/wholesale-users');
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Delete a wholesale user
+router.post('/wholesale-users/:id/delete', async (req, res, next) => {
+  try {
+    await query('DELETE FROM wholesale_users WHERE id = $1', [parseInt(req.params.id, 10)]);
+    res.redirect('/admin/wholesale-users');
+  } catch (err) {
+    next(err);
+  }
+});
 router.post('/categories/:id/move-down', async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -422,6 +521,14 @@ router.post('/settings', upload.single('logo'), async (req, res, next) => {
     await setSetting('ticker_text', (req.body.ticker_text || '').trim());
     await setSetting('ticker_color', (req.body.ticker_color || '#ffffff').trim());
     await setSetting('ticker_bg_color', (req.body.ticker_bg_color || '#0a0a0a').trim());
+
+    // Save wholesale currency settings
+    await setSetting('wholesale_currency', (req.body.wholesale_currency || 'USD').trim().toUpperCase());
+    await setSetting('wholesale_symbol', (req.body.wholesale_symbol || '$').trim());
+    await setSetting('retail_currency', (req.body.retail_currency || 'TRY').trim().toUpperCase());
+    await setSetting('retail_symbol', (req.body.retail_symbol || '₺').trim());
+    const rate = parseFloat(req.body.exchange_rate) || 32;
+    await setSetting('exchange_rate', String(rate));
 
     if (req.file) {
       // store logo as base64

@@ -229,6 +229,16 @@ input:focus, textarea:focus, select:focus {
   width: 30%;
 }
 
+.wholesale-badge {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+}
+.wholesale-badge:hover {
+  background: linear-gradient(135deg, var(--gold-dark), #8b6508) !important;
+  color: #fff !important;
+}
+
 .nav-contact-wrapper {
   position: relative;
 }

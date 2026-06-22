@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %> | <%= siteName %></title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card wholesale-login">
+    <div class="login-logo"><%= siteName %></div>
+    <div class="login-subtitle">🏪 دخول تجار الجملة</div>
+
+    <% if (error) { %>
+      <div class="error-msg"><%= error %></div>
+    <% } %>
+
+    <form method="POST" action="/wholesale-login">
+      <div class="form-group">
+        <label for="username">اسم المستخدم</label>
+        <input type="text" id="username" name="username" required autofocus autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary">دخول</button>
+    </form>
+
+    <div style="margin-top: 20px; text-align: center;">
+      <a href="/" style="font-size: 13px; color: #aaa;">← العودة للموقع</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

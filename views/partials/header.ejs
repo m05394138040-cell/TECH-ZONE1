@@ -19,6 +19,11 @@
       <nav class="header-nav">
         <a href="/" class="nav-link">الرئيسية</a>
         <a href="/#categories" class="nav-link">الأقسام</a>
+        <% if (isWholesale) { %>
+          <a href="/wholesale-logout" class="nav-link wholesale-badge" title="تسجيل خروج">🏪 <%= wholesaleUsername %> ✕</a>
+        <% } else { %>
+          <a href="/wholesale-login" class="nav-link">🏪 دخول الجملة</a>
+        <% } %>
         <div class="nav-contact-wrapper">
           <button type="button" class="nav-link nav-contact-btn" id="contactToggle" aria-haspopup="true" aria-expanded="false">
             تواصل <span class="caret">▾</span>
