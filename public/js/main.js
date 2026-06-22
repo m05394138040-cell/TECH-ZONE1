@@ -50,7 +50,7 @@
     allEl.hidden = true;
   }
 
-  function renderResults(results, q) {
+  function renderResults(results, q, isWholesale) {
     if (!results || results.length === 0) {
       resultsEl.innerHTML = '';
       emptyEl.hidden = false;
@@ -66,13 +66,12 @@
       const img = p.image_type
         ? '<img src="/img/' + p.id + '" alt="" />'
         : '<span class="no-img">📦</span>';
-      // The server-rendered displayPrice isn't available here, so we pick the
-      // right price based on a data attribute set in the header search
-      // (wholesale cookie detection happens server-side, but for live results
-      // we just use the price + a generic symbol fallback). The full results
-      // page uses displayPrice properly.
-      const price = p.price;
-      const symbol = '$';
+      // Pick the right price + symbol per viewer (mirrors server-side displayPrice):
+      //   - Wholesale (logged in): p.price + '$' (wholesale_symbol)
+      //   - Visitor (default):      p.price_retail (fallback p.price) + '₺' (retail_symbol)
+      const symbol = isWholesale ? '$' : '₺';
+      const rawPrice = isWholesale ? p.price : (p.price_retail || p.price);
+      const price = parseFloat(rawPrice || 0).toFixed(2);
       return (
         '<a class="search-dropdown-item" href="/product/' + p.id + '">' +
           '<div class="search-dropdown-img">' + img + '</div>' +
@@ -100,7 +99,7 @@
       if (!res.ok) throw new Error('search failed');
       const data = await res.json();
       if (requestId !== activeRequest) return; // stale
-      renderResults(data.results || [], q);
+      renderResults(data.results || [], q, !!data.isWholesale);
     } catch (err) {
       if (requestId !== activeRequest) return;
       resultsEl.innerHTML = '<div class="search-dropdown-empty">حدث خطأ في البحث</div>';

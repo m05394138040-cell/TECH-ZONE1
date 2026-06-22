@@ -97,9 +97,10 @@ router.get('/api/search', async (req, res, next) => {
   try {
     const q = (req.query.q || '').trim();
     if (!q || q.length < 1) {
-      return res.json({ results: [], query: q, count: 0 });
+      return res.json({ results: [], query: q, count: 0, isWholesale: false });
     }
     const pattern = `%${q}%`;
+    // Only return columns the public needs (no price_cost — admin only)
     const results = await queryAll(
       `SELECT p.id, p.name, p.description, p.price, p.price_retail, p.image_type,
               c.name AS category_name, c.slug AS category_slug
@@ -113,7 +114,14 @@ router.get('/api/search', async (req, res, next) => {
         LIMIT 20`,
       [pattern]
     );
-    res.json({ results, query: q, count: results.length });
+    // Use the same res.locals.isWholesale set by the attachWholesaleToViews middleware
+    const isWholesale = !!res.locals.isWholesale;
+    res.json({
+      results,
+      query: q,
+      count: results.length,
+      isWholesale,
+    });
   } catch (err) {
     next(err);
   }
