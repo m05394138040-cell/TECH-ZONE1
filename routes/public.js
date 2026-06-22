@@ -43,7 +43,7 @@ router.get('/category/:slug', async (req, res, next) => {
       return res.status(404).render('404', { title: 'القسم غير موجود' });
     }
     const products = await queryAll(
-      `SELECT id, name, description, price, available, image_type
+      `SELECT id, name, description, price, price_retail, available, image_type
          FROM products
         WHERE category_id = $1
         ORDER BY sort_order, id`,
