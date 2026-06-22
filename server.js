@@ -49,21 +49,26 @@ app.use(async (req, res, next) => {
     res.locals.siteName = res.locals.settings.site_name || 'TECH ZONE';
     res.locals.whatsappNumber = res.locals.settings.whatsapp_number || '';
 
-    // Currency helpers for views
-    const rate = parseFloat(res.locals.settings.exchange_rate) || 32;
-    res.locals.exchangeRate = rate;
+    // Currency symbols (no conversion, each product has its own price per audience)
     res.locals.wholesaleSymbol = res.locals.settings.wholesale_symbol || '$';
     res.locals.retailSymbol = res.locals.settings.retail_symbol || '₺';
-    // Convert USD price to local display price
-    res.locals.formatPrice = (usdPrice) => {
+    res.locals.wholesaleCurrency = res.locals.settings.wholesale_currency || 'USD';
+    res.locals.retailCurrency = res.locals.settings.retail_currency || 'TRY';
+    // Pick the right price + symbol per viewer (no conversion; admin enters both manually)
+    res.locals.displayPrice = (product) => {
       if (res.locals.isWholesale) {
-        // Wholesale customers see USD price
-        return parseFloat(usdPrice).toFixed(2) + ' ' + res.locals.wholesaleSymbol;
-      } else {
-        // Visitors see converted price (USD * exchange_rate)
-        const converted = (parseFloat(usdPrice) * rate).toFixed(2);
-        return converted + ' ' + res.locals.retailSymbol;
+        return {
+          amount: parseFloat(product.price).toFixed(2),
+          symbol: res.locals.wholesaleSymbol,
+          currency: res.locals.wholesaleCurrency,
+        };
       }
+      const amount = parseFloat(product.price_retail || product.price).toFixed(2);
+      return {
+        amount,
+        symbol: res.locals.retailSymbol,
+        currency: res.locals.retailCurrency,
+      };
     };
     next();
   } catch (err) {
@@ -191,6 +196,11 @@ async function ensureSchema() {
           created_at TIMESTAMP DEFAULT NOW()
         )
       `);
+
+      // Ensure products has price_retail column
+      await query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS price_retail DECIMAL(10,2) DEFAULT 0`);
+      // Backfill: copy price -> price_retail for any rows where price_retail is 0 (but price > 0)
+      await query(`UPDATE products SET price_retail = price WHERE (price_retail IS NULL OR price_retail = 0) AND price > 0`);
     } catch (err) {
       console.error('⚠️  Migration error:', err.message);
     }

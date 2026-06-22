@@ -375,7 +375,7 @@ router.get('/products/new', async (req, res, next) => {
 
 router.post('/products/new', upload.single('image'), async (req, res, next) => {
   try {
-    const { name, description, price, available, category_id } = req.body;
+    const { name, description, price, price_retail, available, category_id } = req.body;
     if (!name || !price || !category_id) {
       const categories = await queryAll('SELECT * FROM categories ORDER BY sort_order, id');
       return res.render('admin/product-form', {
@@ -389,10 +389,14 @@ router.post('/products/new', upload.single('image'), async (req, res, next) => {
     const imageData = req.file ? req.file.buffer : null;
     const imageType = req.file ? req.file.mimetype : null;
     const isAvailable = available === 'on' || available === 'true';
+    // If price_retail is not provided, default to the wholesale price
+    const retailPrice = price_retail && parseFloat(price_retail) > 0
+      ? parseFloat(price_retail)
+      : parseFloat(price);
     await query(
-      `INSERT INTO products (category_id, name, description, price, available, image_data, image_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [parseInt(category_id, 10), name.trim(), description || '', parseFloat(price), isAvailable, imageData, imageType]
+      `INSERT INTO products (category_id, name, description, price, price_retail, available, image_data, image_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+      [parseInt(category_id, 10), name.trim(), description || '', parseFloat(price), retailPrice, isAvailable, imageData, imageType]
     );
     res.redirect('/admin/products');
   } catch (err) {
@@ -421,34 +425,37 @@ router.get('/products/:id/edit', async (req, res, next) => {
 router.post('/products/:id/edit', upload.single('image'), async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const { name, description, price, available, category_id, remove_image } = req.body;
+    const { name, description, price, price_retail, available, category_id, remove_image } = req.body;
     const isAvailable = available === 'on' || available === 'true';
+    const retailPrice = price_retail && parseFloat(price_retail) > 0
+      ? parseFloat(price_retail)
+      : parseFloat(price);
 
     if (req.file) {
       await query(
         `UPDATE products
-            SET name = $1, description = $2, price = $3, available = $4,
-                category_id = $5, image_data = $6, image_type = $7, updated_at = NOW()
-          WHERE id = $8`,
-        [name.trim(), description || '', parseFloat(price), isAvailable,
+            SET name = $1, description = $2, price = $3, price_retail = $4, available = $5,
+                category_id = $6, image_data = $7, image_type = $8, updated_at = NOW()
+          WHERE id = $9`,
+        [name.trim(), description || '', parseFloat(price), retailPrice, isAvailable,
          parseInt(category_id, 10), req.file.buffer, req.file.mimetype, id]
       );
     } else if (remove_image === '1') {
       await query(
         `UPDATE products
-            SET name = $1, description = $2, price = $3, available = $4,
-                category_id = $5, image_data = NULL, image_type = NULL, updated_at = NOW()
-          WHERE id = $6`,
-        [name.trim(), description || '', parseFloat(price), isAvailable,
+            SET name = $1, description = $2, price = $3, price_retail = $4, available = $5,
+                category_id = $6, image_data = NULL, image_type = NULL, updated_at = NOW()
+          WHERE id = $7`,
+        [name.trim(), description || '', parseFloat(price), retailPrice, isAvailable,
          parseInt(category_id, 10), id]
       );
     } else {
       await query(
         `UPDATE products
-            SET name = $1, description = $2, price = $3, available = $4,
-                category_id = $5, updated_at = NOW()
-          WHERE id = $6`,
-        [name.trim(), description || '', parseFloat(price), isAvailable,
+            SET name = $1, description = $2, price = $3, price_retail = $4, available = $5,
+                category_id = $6, updated_at = NOW()
+          WHERE id = $7`,
+        [name.trim(), description || '', parseFloat(price), retailPrice, isAvailable,
          parseInt(category_id, 10), id]
       );
     }
@@ -527,8 +534,12 @@ router.post('/settings', upload.single('logo'), async (req, res, next) => {
     await setSetting('wholesale_symbol', (req.body.wholesale_symbol || '$').trim());
     await setSetting('retail_currency', (req.body.retail_currency || 'TRY').trim().toUpperCase());
     await setSetting('retail_symbol', (req.body.retail_symbol || '₺').trim());
-    const rate = parseFloat(req.body.exchange_rate) || 32;
-    await setSetting('exchange_rate', String(rate));
+    // exchange_rate setting is no longer used (each product has manual prices),
+    // but we keep reading it for backward compatibility with any old forms
+    if (req.body.exchange_rate !== undefined) {
+      const rate = parseFloat(req.body.exchange_rate) || 32;
+      await setSetting('exchange_rate', String(rate));
+    }
 
     if (req.file) {
       // store logo as base64

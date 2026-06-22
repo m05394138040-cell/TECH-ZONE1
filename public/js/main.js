@@ -14,15 +14,13 @@
   const waBtn = document.getElementById('wa-btn');
 
   if (qtyInput && totalValueEl && waBtn) {
-    const pricePerUnit = parseFloat(document.getElementById('unit-price').value) || 0;
+    // The price + symbol passed in by the server already match the viewer type
+    // (wholesale: USD, retail: TRY) — no client-side conversion needed.
+    const pricePerUnit = parseFloat(waBtn.dataset.price) || 0;
     const productName = document.getElementById('product-name').value || '';
     const categoryName = document.getElementById('category-name').value || '';
     const whatsappNumber = (waBtn.dataset.phone || '').replace(/[^\d]/g, '');
-    // Read currency settings from data attributes
-    const currencySymbol = waBtn.dataset.currencySymbol || '$';
-    const isWholesale = waBtn.dataset.isWholesale === 'true';
-    const exchangeRate = parseFloat(waBtn.dataset.exchangeRate) || 1;
-    const displayPrice = isWholesale ? pricePerUnit : pricePerUnit * exchangeRate;
+    const currencySymbol = waBtn.dataset.currencySymbol || '';
     const formatPrice = (n) => n.toFixed(2);
 
     function updateTotal() {
@@ -35,7 +33,7 @@
         qty = 999;
         qtyInput.value = 999;
       }
-      const total = qty * displayPrice;
+      const total = qty * pricePerUnit;
       totalValueEl.textContent = formatPrice(total);
 
       // Build WhatsApp message
@@ -44,7 +42,7 @@
         '',
         `📦 المنتج: ${productName}`,
         `📂 القسم: ${categoryName}`,
-        `💵 سعر القطعة: ${formatPrice(displayPrice)} ${currencySymbol}`,
+        `💵 سعر القطعة: ${formatPrice(pricePerUnit)} ${currencySymbol}`,
         `🔢 الكمية: ${qty}`,
         `💰 المجموع الكلي: ${formatPrice(total)} ${currencySymbol}`,
         '',

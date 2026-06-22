@@ -87,39 +87,31 @@
   </div>
 
   <div class="form-section">
-    <h2>💱 إعدادات العملات (الجملة / التجزئة)</h2>
+    <h2>💱 رموز العملات</h2>
     <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
-      السعر في المنتجات مخزّن بالدولار (USD). الزوار يشوفونه محوّل للّيرة التركية، تجار الجملة (بعد تسجيل دخول) يشوفونه بالدولار.
+      الرمز اللي بيظهر جنب السعر. كل منتج إلو سعرين منفصلين (جملة + تجزئة) بتدخلهم يدوي.
     </p>
 
     <div class="form-row cols-2">
       <div class="form-group">
-        <label for="wholesale_currency">رمز عملة الجملة</label>
+        <label for="wholesale_currency">عملة الجملة (الاسم)</label>
         <input type="text" id="wholesale_currency" name="wholesale_currency" value="<%= settings.wholesale_currency || 'USD' %>" maxlength="5" dir="ltr" />
       </div>
       <div class="form-group">
-        <label for="wholesale_symbol">رمز الجملة ($/₺/€)</label>
+        <label for="wholesale_symbol">رمز عملة الجملة</label>
         <input type="text" id="wholesale_symbol" name="wholesale_symbol" value="<%= settings.wholesale_symbol || '$' %>" maxlength="3" dir="ltr" />
       </div>
     </div>
 
     <div class="form-row cols-2">
       <div class="form-group">
-        <label for="retail_currency">رمز عملة الزوار</label>
+        <label for="retail_currency">عملة الزوار (الاسم)</label>
         <input type="text" id="retail_currency" name="retail_currency" value="<%= settings.retail_currency || 'TRY' %>" maxlength="5" dir="ltr" />
       </div>
       <div class="form-group">
-        <label for="retail_symbol">رمز الزوار</label>
+        <label for="retail_symbol">رمز عملة الزوار</label>
         <input type="text" id="retail_symbol" name="retail_symbol" value="<%= settings.retail_symbol || '₺' %>" maxlength="3" dir="ltr" />
       </div>
-    </div>
-
-    <div class="form-group">
-      <label for="exchange_rate">سعر الصرف (1 USD = ؟)</label>
-      <input type="number" id="exchange_rate" name="exchange_rate" value="<%= settings.exchange_rate || '32' %>" step="0.01" min="0.01" dir="ltr" style="max-width: 200px;" />
-      <p style="color: var(--gray-muted); font-size: 12px; margin-top: 6px;">
-        عدّل هاد الرقم حسب سعر الصرف الحالي. مثال: 1 USD = 32 ₺
-      </p>
     </div>
   </div>
 

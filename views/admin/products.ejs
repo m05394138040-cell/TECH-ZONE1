@@ -39,7 +39,12 @@
             <% } %>
           </td>
           <td><span style="color: var(--gold); font-size: 13px;"><%= p.category_name %></span></td>
-          <td><strong style="color: var(--gold);">$<%= parseFloat(p.price).toFixed(2) %></strong></td>
+          <td>
+            <div style="color: var(--gold); font-weight: 700;">$<%= parseFloat(p.price).toFixed(2) %></div>
+            <% if (p.price_retail && parseFloat(p.price_retail) > 0) { %>
+              <div style="color: var(--gray-muted); font-size: 12px;">₺<%= parseFloat(p.price_retail).toFixed(2) %></div>
+            <% } %>
+          </td>
           <td>
             <% if (p.available) { %>
               <span class="availability-pill in">متوفر</span>

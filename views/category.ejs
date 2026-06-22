@@ -36,7 +36,11 @@
         </div>
         <div class="product-body">
           <div class="product-name"><%= p.name %></div>
-          <div class="product-price"><%= formatPrice(p.price) %></div>
+          <% const dp = displayPrice(p); %>
+          <div class="product-price">
+            <%= dp.amount %>
+            <span class="currency"><%= dp.symbol %></span>
+          </div>
         </div>
       </a>
     <% }); %>
