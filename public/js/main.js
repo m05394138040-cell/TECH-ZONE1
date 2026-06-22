@@ -281,49 +281,38 @@
     });
   }
 })();
-// ===== Hero Slider =====
+// ===== Hero Slider (slide animation, no controls) =====
 (function () {
   'use strict';
   const slider = document.getElementById('heroSlider');
   if (!slider) return;
-  const slides = slider.querySelectorAll('.hero-slider-slide');
-  const dots = slider.querySelectorAll('.hero-slider-dot');
-  const prevBtn = document.getElementById('heroSliderPrev');
-  const nextBtn = document.getElementById('heroSliderNext');
-
-  if (slides.length <= 1) {
-    if (slides[0]) slides[0].classList.add('active');
-    return;
-  }
+  const track = document.getElementById('heroSliderTrack');
+  if (!track) return;
+  const slides = track.querySelectorAll('.hero-slider-slide');
+  const total = slides.length;
+  if (total === 0) return;
 
   let current = 0;
   let timer = null;
   const INTERVAL = 5000; // 5 seconds
 
-  function show(idx) {
-    current = (idx + slides.length) % slides.length;
-    slides.forEach((s, i) => s.classList.toggle('active', i === current));
-    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  function goTo(idx) {
+    current = ((idx % total) + total) % total; // safe modulo for negatives
+    track.style.transform = 'translateX(-' + (current * 100) + '%)';
   }
-  function next() { show(current + 1); }
-  function prev() { show(current - 1); }
+  function next() { goTo(current + 1); }
   function start() { stop(); timer = setInterval(next, INTERVAL); }
   function stop() { if (timer) { clearInterval(timer); timer = null; } }
 
-  show(0);
+  // Initial position
+  goTo(0);
 
-  if (prevBtn) prevBtn.addEventListener('click', () => { prev(); start(); });
-  if (nextBtn) nextBtn.addEventListener('click', () => { next(); start(); });
+  if (total <= 1) {
+    // No auto-advance needed for a single slide
+    return;
+  }
 
-  dots.forEach((d) => {
-    d.addEventListener('click', () => {
-      const i = parseInt(d.dataset.index, 10) || 0;
-      show(i);
-      start();
-    });
-  });
-
-  // Touch / swipe support
+  // Touch / swipe support (mobile)
   let touchStartX = 0;
   let touchEndX = 0;
   slider.addEventListener('touchstart', (e) => {
@@ -335,7 +324,7 @@
     const dx = touchEndX - touchStartX;
     if (Math.abs(dx) > 40) {
       if (dx < 0) next();
-      else prev();
+      else goTo(current - 1);
     }
     start();
   }, { passive: true });
@@ -344,7 +333,7 @@
   slider.addEventListener('mouseenter', stop);
   slider.addEventListener('mouseleave', start);
 
-  // Pause when tab is hidden
+  // Pause when tab is hidden (saves CPU)
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop(); else start();
   });
