@@ -182,6 +182,20 @@ async function ensureSchema() {
         );
       }
 
+      // Ensure slider_images table exists
+      await query(`
+        CREATE TABLE IF NOT EXISTS slider_images (
+          id SERIAL PRIMARY KEY,
+          title VARCHAR(200) DEFAULT '',
+          link_url VARCHAR(500) DEFAULT '',
+          image_data BYTEA NOT NULL,
+          image_type VARCHAR(50),
+          sort_order INT DEFAULT 0,
+          is_active BOOLEAN DEFAULT TRUE,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+
       // Ensure wholesale users table exists
       await query(`
         CREATE TABLE IF NOT EXISTS wholesale_users (

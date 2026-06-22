@@ -15,6 +15,39 @@
   <% } %>
 <% } %>
 
+<% if (sliderImages && sliderImages.length > 0) { %>
+  <section class="hero-slider" id="heroSlider" aria-label="سلايدر العروض">
+    <div class="hero-slider-track" id="heroSliderTrack">
+      <% sliderImages.forEach(function(img, i) { %>
+        <% if (img.link_url) { %>
+          <a class="hero-slider-slide" href="<%= img.link_url %>" data-index="<%= i %>" <%= img.link_url.startsWith('http') ? 'target="_blank" rel="noopener"' : '' %>>
+        <% } else { %>
+          <div class="hero-slider-slide" data-index="<%= i %>">
+        <% } %>
+          <img src="/slider-img/<%= img.id %>" alt="<%= img.title || ('عرض ' + (i + 1)) %>" loading="<%= i === 0 ? 'eager' : 'lazy' %>" />
+          <% if (img.title) { %>
+            <div class="hero-slider-caption"><%= img.title %></div>
+          <% } %>
+        <% if (img.link_url) { %>
+          </a>
+        <% } else { %>
+          </div>
+        <% } %>
+      <% }); %>
+    </div>
+
+    <% if (sliderImages.length > 1) { %>
+      <button class="hero-slider-arrow hero-slider-prev" id="heroSliderPrev" aria-label="السابق">‹</button>
+      <button class="hero-slider-arrow hero-slider-next" id="heroSliderNext" aria-label="التالي">›</button>
+      <div class="hero-slider-dots" id="heroSliderDots">
+        <% sliderImages.forEach(function(_, i) { %>
+          <button class="hero-slider-dot <%= i === 0 ? 'active' : '' %>" data-index="<%= i %>" aria-label="الانتقال للصورة <%= i + 1 %>"></button>
+        <% }); %>
+      </div>
+    <% } %>
+  </section>
+<% } %>
+
 <h2 class="section-title" id="categories">تصفح الأقسام</h2>
 
 <% if (categories.length === 0) { %>

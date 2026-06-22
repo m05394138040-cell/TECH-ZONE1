@@ -281,3 +281,73 @@
     });
   }
 })();
+// ===== Hero Slider =====
+(function () {
+  'use strict';
+  const slider = document.getElementById('heroSlider');
+  if (!slider) return;
+  const slides = slider.querySelectorAll('.hero-slider-slide');
+  const dots = slider.querySelectorAll('.hero-slider-dot');
+  const prevBtn = document.getElementById('heroSliderPrev');
+  const nextBtn = document.getElementById('heroSliderNext');
+
+  if (slides.length <= 1) {
+    if (slides[0]) slides[0].classList.add('active');
+    return;
+  }
+
+  let current = 0;
+  let timer = null;
+  const INTERVAL = 5000; // 5 seconds
+
+  function show(idx) {
+    current = (idx + slides.length) % slides.length;
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  }
+  function next() { show(current + 1); }
+  function prev() { show(current - 1); }
+  function start() { stop(); timer = setInterval(next, INTERVAL); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+  show(0);
+
+  if (prevBtn) prevBtn.addEventListener('click', () => { prev(); start(); });
+  if (nextBtn) nextBtn.addEventListener('click', () => { next(); start(); });
+
+  dots.forEach((d) => {
+    d.addEventListener('click', () => {
+      const i = parseInt(d.dataset.index, 10) || 0;
+      show(i);
+      start();
+    });
+  });
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  let touchEndX = 0;
+  slider.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    stop();
+  }, { passive: true });
+  slider.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const dx = touchEndX - touchStartX;
+    if (Math.abs(dx) > 40) {
+      if (dx < 0) next();
+      else prev();
+    }
+    start();
+  }, { passive: true });
+
+  // Pause on hover (desktop)
+  slider.addEventListener('mouseenter', stop);
+  slider.addEventListener('mouseleave', start);
+
+  // Pause when tab is hidden
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
+
+  start();
+})();

@@ -1,0 +1,117 @@
+<%- include('_head') %>
+
+<% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+<% if (success) { %><div class="success-msg"><%= success %></div><% } %>
+
+<div class="form-section">
+  <h2>🎬 إضافة صورة جديدة للسلايدر</h2>
+  <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
+    الصور تظهر أعلى الصفحة الرئيسية فوق "تصفح الأقسام" — تتغير تلقائياً كل 5 ثوانٍ.
+    الحجم الموصى به: <strong style="color: var(--gold);">1440 × 400 بكسل</strong> (responsive تلقائياً).
+  </p>
+  <form method="POST" action="/admin/slider/new" enctype="multipart/form-data">
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="title">عنوان الصورة (اختياري)</label>
+        <input type="text" id="title" name="title" placeholder="مثلاً: عرض خاص على السماعات" />
+      </div>
+      <div class="form-group">
+        <label for="link_url">رابط عند الضغط (اختياري)</label>
+        <input type="url" id="link_url" name="link_url" placeholder="https://wa.me/... أو /category/سماعات" dir="ltr" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="image">اختر صورة *</label>
+      <input type="file" id="image" name="image" accept="image/*" required />
+      <p style="color: var(--gray-muted); font-size: 12px; margin-top: 6px;">
+        JPG, PNG, WEBP — حد أقصى 5MB — يفضل نسبة عرض 1440:400 أو 16:5
+      </p>
+    </div>
+    <button type="submit" class="btn btn-primary">➕ إضافة للسلايدر</button>
+  </form>
+</div>
+
+<div class="form-section">
+  <h2>🖼️ صور السلايدر الحالية (<%= images.length %>)</h2>
+  <% if (images.length === 0) { %>
+    <div style="text-align: center; padding: 40px 20px; color: var(--gray-muted);">
+      <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
+      <p>لا توجد صور بعد — أضف واحدة من النموذج أعلاه</p>
+    </div>
+  <% } else { %>
+    <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
+      💡 اسحب الصور لإعادة ترتيبها — الترتيب يحفظ تلقائياً
+    </p>
+    <div id="slider-images-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
+      <% images.forEach(function(img, idx) { %>
+        <div class="slider-image-card" data-id="<%= img.id %>" style="background: var(--dark-card); border: 2px solid var(--black-border); border-radius: 12px; overflow: hidden; cursor: grab; transition: all 0.2s; <%= img.is_active ? '' : 'opacity: 0.4;' %>">
+          <div style="position: relative; aspect-ratio: 1440 / 400; background: #000; overflow: hidden;">
+            <img src="/slider-img/<%= img.id %>" alt="<%= img.title || 'Slider ' + img.id %>" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+            <div style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: var(--gold); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 800;">
+              #<%= idx + 1 %>
+            </div>
+            <% if (!img.is_active) { %>
+              <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5);">
+                <span style="background: #ef4444; color: white; padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 13px;">معطلة</span>
+              </div>
+            <% } %>
+          </div>
+          <div style="padding: 12px 14px;">
+            <form method="POST" action="/admin/slider/<%= img.id %>/update">
+              <div style="margin-bottom: 8px;">
+                <input type="text" name="title" value="<%= img.title || '' %>" placeholder="عنوان الصورة" style="width: 100%; padding: 6px 10px; font-size: 13px;" />
+              </div>
+              <div style="margin-bottom: 8px;">
+                <input type="url" name="link_url" value="<%= img.link_url || '' %>" placeholder="رابط (اختياري)" dir="ltr" style="width: 100%; padding: 6px 10px; font-size: 12px;" />
+              </div>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;">
+                <button type="submit" class="btn btn-secondary btn-sm">💾 حفظ</button>
+                <button type="submit" formaction="/admin/slider/<%= img.id %>/toggle" class="btn btn-secondary btn-sm"><%= img.is_active ? '🚫' : '✅' %></button>
+                <button type="submit" formaction="/admin/slider/<%= img.id %>/delete" class="btn btn-danger btn-sm" data-confirm="حذف هذه الصورة نهائياً؟">🗑️</button>
+                <span style="margin-right: auto; color: var(--gray-muted); font-size: 11px; align-self: center;">☜ اسحب للترتيب</span>
+              </div>
+            </form>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+  (function () {
+    const list = document.getElementById('slider-images-list');
+    if (!list || typeof Sortable === 'undefined') return;
+    Sortable.create(list, {
+      animation: 200,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      onEnd: async function (evt) {
+        const ids = Array.from(list.querySelectorAll('.slider-image-card')).map(c => c.dataset.id);
+        try {
+          const res = await fetch('/admin/slider/reorder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order: ids }),
+          });
+          if (res.ok) {
+            // Update the #N badges
+            list.querySelectorAll('.slider-image-card').forEach((card, i) => {
+              const badge = card.querySelector('.slider-image-card > div:first-child > div:first-child');
+              if (badge) badge.textContent = '#' + (i + 1);
+            });
+          }
+        } catch (e) {
+          console.error('Reorder failed:', e);
+        }
+      },
+    });
+  })();
+</script>
+<style>
+  .sortable-ghost { opacity: 0.4; }
+  .sortable-chosen { box-shadow: 0 8px 24px rgba(212, 175, 55, 0.3) !important; }
+</style>
+
+<%- include('_foot') %>

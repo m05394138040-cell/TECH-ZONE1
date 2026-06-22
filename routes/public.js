@@ -18,7 +18,7 @@ router.get('/contact', async (req, res, next) => {
   }
 });
 
-// ===== Home: list categories =====
+// ===== Home: list categories + slider images =====
 router.get('/', async (req, res, next) => {
   try {
     const categories = await queryAll(
@@ -28,7 +28,14 @@ router.get('/', async (req, res, next) => {
          FROM categories c
         ORDER BY c.sort_order, c.id`
     );
-    res.render('index', { title: res.locals.siteName, categories });
+    // Only send metadata (no image data) for slider — the <img> tags fetch from /slider-img/:id
+    const sliderImages = await queryAll(
+      `SELECT id, title, link_url
+         FROM slider_images
+        WHERE is_active = TRUE
+        ORDER BY sort_order, id DESC`
+    );
+    res.render('index', { title: res.locals.siteName, categories, sliderImages });
   } catch (err) {
     next(err);
   }
@@ -177,6 +184,32 @@ router.get('/cat-img/:id', async (req, res, next) => {
     const row = await queryOne('SELECT image_data, image_type FROM categories WHERE id = $1', [id]);
     if (!row || !row.image_data) {
       // Empty 1x1 transparent gif (frontend will fall back to emoji)
+      const placeholder = Buffer.from(
+        'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+        'base64'
+      );
+      res.set('Content-Type', 'image/gif');
+      res.set('Cache-Control', 'public, max-age=3600');
+      return res.send(placeholder);
+    }
+    res.set('Content-Type', row.image_type || 'image/jpeg');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(row.image_data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ===== Slider image stream: /slider-img/:id =====
+router.get('/slider-img/:id', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.status(404).end();
+    const row = await queryOne(
+      'SELECT image_data, image_type FROM slider_images WHERE id = $1 AND is_active = TRUE',
+      [id]
+    );
+    if (!row || !row.image_data) {
       const placeholder = Buffer.from(
         'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
         'base64'

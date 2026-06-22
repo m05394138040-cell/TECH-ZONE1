@@ -598,4 +598,99 @@ router.post('/settings', upload.single('logo'), async (req, res, next) => {
   }
 });
 
+
+// ===== Slider management =====
+router.get('/slider', async (req, res, next) => {
+  try {
+    const images = await queryAll(
+      'SELECT id, title, link_url, image_type, sort_order, is_active, created_at FROM slider_images ORDER BY sort_order, id DESC'
+    );
+    res.render('admin/slider', {
+      title: 'سلايدر العروض',
+      images,
+      error: null,
+      success: null,
+      active: 'slider',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/slider/new', upload.single('image'), async (req, res, next) => {
+  try {
+    if (!req.file) {
+      const images = await queryAll('SELECT id, title, link_url, image_type, sort_order, is_active, created_at FROM slider_images ORDER BY sort_order, id DESC');
+      return res.render('admin/slider', {
+        title: 'سلايدر العروض',
+        images,
+        error: 'الرجاء اختيار صورة',
+        success: null,
+        active: 'slider',
+      });
+    }
+    const { title = '', link_url = '' } = req.body;
+    // Get the next sort_order
+    const maxRow = await queryOne('SELECT COALESCE(MAX(sort_order), -1) AS max_order FROM slider_images');
+    const nextOrder = (maxRow?.max_order ?? -1) + 1;
+    await query(
+      `INSERT INTO slider_images (title, link_url, image_data, image_type, sort_order, is_active)
+       VALUES ($1, $2, $3, $4, $5, TRUE)`,
+      [title.trim(), link_url.trim(), req.file.buffer, req.file.mimetype, nextOrder]
+    );
+    res.redirect('/admin/slider');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/slider/:id/delete', async (req, res, next) => {
+  try {
+    await query('DELETE FROM slider_images WHERE id = $1', [parseInt(req.params.id, 10)]);
+    res.redirect('/admin/slider');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/slider/:id/toggle', async (req, res, next) => {
+  try {
+    await query('UPDATE slider_images SET is_active = NOT is_active WHERE id = $1', [parseInt(req.params.id, 10)]);
+    res.redirect('/admin/slider');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/slider/:id/update', async (req, res, next) => {
+  try {
+    const { title = '', link_url = '' } = req.body;
+    await query(
+      'UPDATE slider_images SET title = $1, link_url = $2 WHERE id = $3',
+      [title.trim(), link_url.trim(), parseInt(req.params.id, 10)]
+    );
+    res.redirect('/admin/slider');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/slider/reorder', async (req, res, next) => {
+  try {
+    const order = req.body.order; // array of IDs
+    if (Array.isArray(order)) {
+      for (let i = 0; i < order.length; i++) {
+        await query(
+          'UPDATE slider_images SET sort_order = $1 WHERE id = $2',
+          [i, parseInt(order[i], 10)]
+        );
+      }
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 module.exports = router;
