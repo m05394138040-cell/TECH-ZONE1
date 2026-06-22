@@ -83,6 +83,64 @@ router.get('/product/:id', async (req, res, next) => {
   }
 });
 
+// ===== Live search API: /api/search?q=... =====
+router.get('/api/search', async (req, res, next) => {
+  try {
+    const q = (req.query.q || '').trim();
+    if (!q || q.length < 1) {
+      return res.json({ results: [], query: q, count: 0 });
+    }
+    const pattern = `%${q}%`;
+    const results = await queryAll(
+      `SELECT p.id, p.name, p.description, p.price, p.price_retail, p.image_type,
+              c.name AS category_name, c.slug AS category_slug
+         FROM products p
+         JOIN categories c ON c.id = p.category_id
+        WHERE p.available = TRUE
+          AND (p.name ILIKE $1 OR p.description ILIKE $1 OR c.name ILIKE $1)
+        ORDER BY
+          CASE WHEN p.name ILIKE $1 THEN 0 ELSE 1 END,
+          p.id DESC
+        LIMIT 20`,
+      [pattern]
+    );
+    res.json({ results, query: q, count: results.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ===== Full search results page: /search?q=... =====
+router.get('/search', async (req, res, next) => {
+  try {
+    const q = (req.query.q || '').trim();
+    let results = [];
+    if (q.length >= 1) {
+      const pattern = `%${q}%`;
+      results = await queryAll(
+        `SELECT p.id, p.name, p.description, p.price, p.price_retail, p.image_type,
+                c.name AS category_name, c.slug AS category_slug
+           FROM products p
+           JOIN categories c ON c.id = p.category_id
+          WHERE p.available = TRUE
+            AND (p.name ILIKE $1 OR p.description ILIKE $1 OR c.name ILIKE $1)
+          ORDER BY
+            CASE WHEN p.name ILIKE $1 THEN 0 ELSE 1 END,
+            p.id DESC
+          LIMIT 60`,
+        [pattern]
+      );
+    }
+    res.render('search', {
+      title: q ? `بحث: ${q}` : 'بحث',
+      query: q,
+      results,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // ===== Image stream: /img/:id =====
 router.get('/img/:id', async (req, res, next) => {
   try {

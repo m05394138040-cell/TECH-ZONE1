@@ -16,6 +16,22 @@
       <a href="/" class="logo">
         <img src="/img/logo-header.png?v=2" alt="<%= siteName %>" class="header-logo-img" />
       </a>
+      <div class="header-search" id="headerSearch">
+        <form class="header-search-form" action="/search" method="get" role="search">
+          <svg class="header-search-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M21 21l-4.35-4.35M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <input type="search" name="q" id="globalSearchInput" placeholder="ابحث عن منتج (مثلاً A20)..." autocomplete="off" aria-label="بحث عن منتج" />
+          <button type="button" class="header-search-clear" id="searchClear" aria-label="مسح" hidden>×</button>
+        </form>
+        <div class="header-search-dropdown" id="searchDropdown" hidden>
+          <div class="search-dropdown-empty" id="searchDropdownEmpty" hidden>لا توجد نتائج</div>
+          <div class="search-dropdown-results" id="searchDropdownResults"></div>
+          <a class="search-dropdown-all" id="searchDropdownAll" href="/search?q=" hidden>
+            عرض كل النتائج ←
+          </a>
+        </div>
+      </div>
       <nav class="header-nav">
         <a href="/" class="nav-link">الرئيسية</a>
         <a href="/#categories" class="nav-link">الأقسام</a>

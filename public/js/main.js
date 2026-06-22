@@ -3,6 +3,165 @@
  * Handles: Quantity calculator + WhatsApp message generator on product page
  */
 
+// ===== Live Search =====
+(function () {
+  'use strict';
+  const input = document.getElementById('globalSearchInput');
+  const dropdown = document.getElementById('searchDropdown');
+  const resultsEl = document.getElementById('searchDropdownResults');
+  const emptyEl = document.getElementById('searchDropdownEmpty');
+  const allEl = document.getElementById('searchDropdownAll');
+  const clearBtn = document.getElementById('searchClear');
+  const form = input ? input.closest('form') : null;
+  if (!input || !dropdown || !resultsEl) return;
+
+  let lastQuery = '';
+  let debounceTimer = null;
+  let activeRequest = 0;
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function highlight(text, q) {
+    if (!q) return escapeHtml(text);
+    const safeText = escapeHtml(text);
+    const safeQ = escapeHtml(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return safeText.replace(new RegExp(safeQ, 'gi'), (m) => '<mark>' + m + '</mark>');
+  }
+
+  function closeDropdown() {
+    dropdown.hidden = true;
+  }
+
+  function openDropdown() {
+    dropdown.hidden = false;
+  }
+
+  function showLoading() {
+    openDropdown();
+    resultsEl.innerHTML = '<div class="search-loading">جاري البحث</div>';
+    emptyEl.hidden = true;
+    allEl.hidden = true;
+  }
+
+  function renderResults(results, q) {
+    if (!results || results.length === 0) {
+      resultsEl.innerHTML = '';
+      emptyEl.hidden = false;
+      allEl.hidden = true;
+      openDropdown();
+      return;
+    }
+    emptyEl.hidden = true;
+    allEl.hidden = false;
+    allEl.href = '/search?q=' + encodeURIComponent(q);
+
+    const html = results.map((p) => {
+      const img = p.image_type
+        ? '<img src="/img/' + p.id + '" alt="" />'
+        : '<span class="no-img">📦</span>';
+      // The server-rendered displayPrice isn't available here, so we pick the
+      // right price based on a data attribute set in the header search
+      // (wholesale cookie detection happens server-side, but for live results
+      // we just use the price + a generic symbol fallback). The full results
+      // page uses displayPrice properly.
+      const price = p.price;
+      const symbol = '$';
+      return (
+        '<a class="search-dropdown-item" href="/product/' + p.id + '">' +
+          '<div class="search-dropdown-img">' + img + '</div>' +
+          '<div class="search-dropdown-info">' +
+            '<div class="search-dropdown-name">' + highlight(p.name, q) + '</div>' +
+            '<div class="search-dropdown-cat">📂 ' + escapeHtml(p.category_name || '') + '</div>' +
+          '</div>' +
+          '<div class="search-dropdown-price">' + parseFloat(price).toFixed(2) + ' ' + symbol + '</div>' +
+        '</a>'
+      );
+    }).join('');
+    resultsEl.innerHTML = html;
+    openDropdown();
+  }
+
+  async function runSearch(q) {
+    if (q === lastQuery) return;
+    lastQuery = q;
+    const requestId = ++activeRequest;
+    showLoading();
+    try {
+      const res = await fetch('/api/search?q=' + encodeURIComponent(q), {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) throw new Error('search failed');
+      const data = await res.json();
+      if (requestId !== activeRequest) return; // stale
+      renderResults(data.results || [], q);
+    } catch (err) {
+      if (requestId !== activeRequest) return;
+      resultsEl.innerHTML = '<div class="search-dropdown-empty">حدث خطأ في البحث</div>';
+      emptyEl.hidden = true;
+      allEl.hidden = true;
+      openDropdown();
+    }
+  }
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    clearBtn.hidden = q.length === 0;
+    if (q.length === 0) {
+      lastQuery = '';
+      closeDropdown();
+      return;
+    }
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => runSearch(q), 220);
+  });
+
+  input.addEventListener('focus', () => {
+    if (input.value.trim().length > 0) openDropdown();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    input.value = '';
+    clearBtn.hidden = true;
+    lastQuery = '';
+    closeDropdown();
+    input.focus();
+  });
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!dropdown.contains(e.target) && e.target !== input && !input.contains(e.target)) {
+      closeDropdown();
+    }
+  });
+
+  // Close on Escape
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeDropdown();
+      input.blur();
+    }
+  });
+
+  // Submit goes to /search for full results
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      const q = input.value.trim();
+      if (!q) {
+        e.preventDefault();
+        input.focus();
+      }
+    });
+  }
+})();
+
+
 (function () {
   'use strict';
 
