@@ -132,6 +132,7 @@ async function createTables() {
       description TEXT DEFAULT '',
       price DECIMAL(10,2) NOT NULL DEFAULT 0,
       price_retail DECIMAL(10,2) NOT NULL DEFAULT 0,
+      price_cost DECIMAL(10,2) NOT NULL DEFAULT 0,
       available BOOLEAN DEFAULT TRUE,
       image_data BYTEA,
       image_type VARCHAR(50),
@@ -145,6 +146,9 @@ async function createTables() {
   await query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS price_retail DECIMAL(10,2) DEFAULT 0`);
   // Backfill: copy price -> price_retail for any rows where price_retail is 0 (but price > 0)
   await query(`UPDATE products SET price_retail = price WHERE (price_retail IS NULL OR price_retail = 0) AND price > 0`);
+
+  // Migration: add price_cost column (admin's purchase cost — hidden from public)
+  await query(`ALTER TABLE products ADD COLUMN IF NOT EXISTS price_cost DECIMAL(10,2) DEFAULT 0`);
 
   await query(`
     CREATE TABLE IF NOT EXISTS settings (

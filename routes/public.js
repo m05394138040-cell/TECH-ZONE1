@@ -66,7 +66,9 @@ router.get('/product/:id', async (req, res, next) => {
     if (isNaN(id)) return res.status(404).render('404', { title: 'منتج غير موجود' });
 
     const product = await queryOne(
-      `SELECT p.*, c.name AS category_name, c.slug AS category_slug
+      `SELECT p.id, p.name, p.description, p.price, p.price_retail, p.available,
+              p.image_type, p.category_id,
+              c.name AS category_name, c.slug AS category_slug
          FROM products p
          JOIN categories c ON c.id = p.category_id
         WHERE p.id = $1`,

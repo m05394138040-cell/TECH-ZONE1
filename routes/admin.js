@@ -103,6 +103,36 @@ router.get('/', async (req, res, next) => {
       available: await safeCount('SELECT COUNT(*)::int AS c FROM products WHERE available = TRUE'),
       unavailable: await safeCount('SELECT COUNT(*)::int AS c FROM products WHERE available = FALSE'),
     };
+
+    // Profit / cost analytics (admin only — price_cost is hidden from public)
+    try {
+      const profitRow = await queryOne(
+        `SELECT
+           COALESCE(SUM(price_cost), 0)::float AS total_cost,
+           COALESCE(SUM(price), 0)::float AS total_wholesale_value,
+           COALESCE(SUM(price - price_cost), 0)::float AS total_profit,
+           COUNT(*) FILTER (WHERE price_cost > 0)::int AS products_with_cost
+         FROM products
+         WHERE available = TRUE`
+      );
+      const totalWholesale = profitRow?.total_wholesale_value || 0;
+      const totalProfit = profitRow?.total_profit || 0;
+      const avgMargin = totalWholesale > 0
+        ? ((totalProfit / totalWholesale) * 100).toFixed(1)
+        : 0;
+      stats.total_cost = profitRow?.total_cost || 0;
+      stats.total_wholesale_value = totalWholesale;
+      stats.total_profit = totalProfit;
+      stats.avg_margin = avgMargin;
+      stats.products_with_cost = profitRow?.products_with_cost || 0;
+    } catch (e) {
+      stats.total_cost = 0;
+      stats.total_wholesale_value = 0;
+      stats.total_profit = 0;
+      stats.avg_margin = 0;
+      stats.products_with_cost = 0;
+    }
+
     res.render('admin/dashboard', { title: 'لوحة التحكم', stats, active: 'dashboard' });
   } catch (err) {
     next(err);
@@ -375,7 +405,7 @@ router.get('/products/new', async (req, res, next) => {
 
 router.post('/products/new', upload.single('image'), async (req, res, next) => {
   try {
-    const { name, description, price, price_retail, available, category_id } = req.body;
+    const { name, description, price, price_retail, price_cost, available, category_id } = req.body;
     if (!name || !price || !category_id) {
       const categories = await queryAll('SELECT * FROM categories ORDER BY sort_order, id');
       return res.render('admin/product-form', {
@@ -389,14 +419,16 @@ router.post('/products/new', upload.single('image'), async (req, res, next) => {
     const imageData = req.file ? req.file.buffer : null;
     const imageType = req.file ? req.file.mimetype : null;
     const isAvailable = available === 'on' || available === 'true';
-    // If price_retail is not provided, default to the wholesale price
     const retailPrice = price_retail && parseFloat(price_retail) > 0
       ? parseFloat(price_retail)
       : parseFloat(price);
+    const costPrice = price_cost && parseFloat(price_cost) > 0
+      ? parseFloat(price_cost)
+      : 0;
     await query(
-      `INSERT INTO products (category_id, name, description, price, price_retail, available, image_data, image_type)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [parseInt(category_id, 10), name.trim(), description || '', parseFloat(price), retailPrice, isAvailable, imageData, imageType]
+      `INSERT INTO products (category_id, name, description, price, price_retail, price_cost, available, image_data, image_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [parseInt(category_id, 10), name.trim(), description || '', parseFloat(price), retailPrice, costPrice, isAvailable, imageData, imageType]
     );
     res.redirect('/admin/products');
   } catch (err) {
@@ -425,37 +457,40 @@ router.get('/products/:id/edit', async (req, res, next) => {
 router.post('/products/:id/edit', upload.single('image'), async (req, res, next) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const { name, description, price, price_retail, available, category_id, remove_image } = req.body;
+    const { name, description, price, price_retail, price_cost, available, category_id, remove_image } = req.body;
     const isAvailable = available === 'on' || available === 'true';
     const retailPrice = price_retail && parseFloat(price_retail) > 0
       ? parseFloat(price_retail)
       : parseFloat(price);
+    const costPrice = price_cost && parseFloat(price_cost) > 0
+      ? parseFloat(price_cost)
+      : 0;
 
     if (req.file) {
       await query(
         `UPDATE products
-            SET name = $1, description = $2, price = $3, price_retail = $4, available = $5,
-                category_id = $6, image_data = $7, image_type = $8, updated_at = NOW()
-          WHERE id = $9`,
-        [name.trim(), description || '', parseFloat(price), retailPrice, isAvailable,
+            SET name = $1, description = $2, price = $3, price_retail = $4, price_cost = $5, available = $6,
+                category_id = $7, image_data = $8, image_type = $9, updated_at = NOW()
+          WHERE id = $10`,
+        [name.trim(), description || '', parseFloat(price), retailPrice, costPrice, isAvailable,
          parseInt(category_id, 10), req.file.buffer, req.file.mimetype, id]
       );
     } else if (remove_image === '1') {
       await query(
         `UPDATE products
-            SET name = $1, description = $2, price = $3, price_retail = $4, available = $5,
-                category_id = $6, image_data = NULL, image_type = NULL, updated_at = NOW()
-          WHERE id = $7`,
-        [name.trim(), description || '', parseFloat(price), retailPrice, isAvailable,
+            SET name = $1, description = $2, price = $3, price_retail = $4, price_cost = $5, available = $6,
+                category_id = $7, image_data = NULL, image_type = NULL, updated_at = NOW()
+          WHERE id = $8`,
+        [name.trim(), description || '', parseFloat(price), retailPrice, costPrice, isAvailable,
          parseInt(category_id, 10), id]
       );
     } else {
       await query(
         `UPDATE products
-            SET name = $1, description = $2, price = $3, price_retail = $4, available = $5,
-                category_id = $6, updated_at = NOW()
-          WHERE id = $7`,
-        [name.trim(), description || '', parseFloat(price), retailPrice, isAvailable,
+            SET name = $1, description = $2, price = $3, price_retail = $4, price_cost = $5, available = $6,
+                category_id = $7, updated_at = NOW()
+          WHERE id = $8`,
+        [name.trim(), description || '', parseFloat(price), retailPrice, costPrice, isAvailable,
          parseInt(category_id, 10), id]
       );
     }

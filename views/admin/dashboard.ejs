@@ -19,6 +19,33 @@
   </div>
 </div>
 
+<% if (typeof stats !== 'undefined' && stats.total_cost !== undefined) { %>
+  <h2 style="margin: 28px 0 14px; color: var(--gold-dark);">💰 ملخص التكاليف والأرباح <span style="font-size: 13px; color: var(--gray-muted); font-weight: 400;">(مخفي عن الزوار)</span></h2>
+  <div class="stats-grid">
+    <div class="stat-card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));">
+      <div class="stat-value" style="-webkit-text-fill-color: #ef4444; background: none; font-size: 28px;">$<%= stats.total_cost.toFixed(2) %></div>
+      <div class="stat-label">إجمالي التكلفة (سعر الشراء)</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(212, 175, 55, 0.05));">
+      <div class="stat-value" style="-webkit-text-fill-color: var(--gold); background: none; font-size: 28px;">$<%= stats.total_wholesale_value.toFixed(2) %></div>
+      <div class="stat-label">قيمة المخزون بسعر الجملة</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.05));">
+      <div class="stat-value" style="-webkit-text-fill-color: #22c55e; background: none; font-size: 28px;">$<%= stats.total_profit.toFixed(2) %></div>
+      <div class="stat-label">الربح المتوقع (للوكلاء)</div>
+    </div>
+    <div class="stat-card" style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));">
+      <div class="stat-value" style="-webkit-text-fill-color: #22c55e; background: none; font-size: 28px;"><%= stats.avg_margin %>%</div>
+      <div class="stat-label">متوسط هامش الربح</div>
+    </div>
+  </div>
+  <% if (stats.products_with_cost < stats.products) { %>
+    <div style="margin: 10px 0 0; padding: 10px 14px; background: rgba(255, 165, 0, 0.08); border-right: 3px solid orange; border-radius: 6px; color: var(--gray-text); font-size: 13px;">
+      💡 <strong style="color: var(--gold);"><%= stats.products - stats.products_with_cost %></strong> منتج بدون سعر شراء. عدّلها وأضف التكلفة لمعرفة الربح الدقيق.
+    </div>
+  <% } %>
+<% } %>
+
 <div class="form-section">
   <h2>🚀 إجراءات سريعة</h2>
   <div style="display: flex; gap: 12px; flex-wrap: wrap;">

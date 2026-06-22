@@ -48,6 +48,28 @@
     </div>
   </div>
 
+  <div class="form-section" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.06), rgba(212, 175, 55, 0.02)); border: 1px dashed rgba(212, 175, 55, 0.5); border-radius: 14px; padding: 18px 20px;">
+    <h2 style="color: var(--gold-dark);">🔒 معلومات خاصة بالأدمن (مخفية عن الجميع)</h2>
+    <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
+      المعلومات التالية <strong>ما بتظهر أبداً</strong> للزوار أو أصحاب المحلات. بتظهر فقط في لوحة التحكم عشان تعرف تكاليفك وأرباحك.
+    </p>
+
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label for="price_cost">💸 سعر الشراء (التكلفة) USD</label>
+        <input type="number" id="price_cost" name="price_cost" step="0.01" min="0" value="<%= product ? (product.price_cost || '') : '' %>" placeholder="0.00" dir="ltr" />
+        <p style="color: var(--gray-muted); font-size: 12px; margin-top: 4px;">السعر اللي اشتريت فيه المنتج — لأغراضك فقط</p>
+      </div>
+      <div class="form-group">
+        <label>📊 هامش الربح المتوقع</label>
+        <div id="profit-preview" style="padding: 10px 14px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text); min-height: 24px;">
+          <span style="color: var(--gray-muted);">سيتم الحساب تلقائياً</span>
+        </div>
+        <p style="color: var(--gray-muted); font-size: 12px; margin-top: 4px;">يحسب الفرق بين سعر الجملة وسعر الشراء</p>
+      </div>
+    </div>
+  </div>
+
   <div class="form-section">
     <h2>🖼️ صورة المنتج</h2>
 
@@ -74,5 +96,46 @@
     <a href="/admin/products" class="btn btn-secondary">إلغاء</a>
   </div>
 </form>
+
+<script>
+  // Live profit margin calculation
+  (function () {
+    const priceInput = document.getElementById('price');
+    const costInput = document.getElementById('price_cost');
+    const preview = document.getElementById('profit-preview');
+    if (!priceInput || !costInput || !preview) return;
+
+    function updateProfit() {
+      const price = parseFloat(priceInput.value) || 0;
+      const cost = parseFloat(costInput.value) || 0;
+      if (cost <= 0) {
+        preview.innerHTML = '<span style="color: var(--gray-muted);">أدخل سعر الشراء لحساب الربح</span>';
+        return;
+      }
+      if (price <= 0) {
+        preview.innerHTML = '<span style="color: var(--gray-muted);">أدخل سعر الجملة أولاً</span>';
+        return;
+      }
+      const profit = price - cost;
+      const margin = price > 0 ? ((profit / price) * 100).toFixed(1) : 0;
+      const costMultiplier = cost > 0 ? (price / cost).toFixed(2) : 0;
+      const color = profit > 0 ? '#22c55e' : (profit < 0 ? '#ef4444' : 'var(--text)');
+      const arrow = profit > 0 ? '📈' : (profit < 0 ? '📉' : '➖');
+      preview.innerHTML =
+        '<div style="display:flex; flex-direction:column; gap:4px;">' +
+          '<div style="font-size:18px; font-weight:800; color:' + color + ';">' +
+            arrow + ' ' + profit.toFixed(2) + ' $ ربح / قطعة' +
+          '</div>' +
+          '<div style="font-size:12px; color: var(--gray-muted);">' +
+            'هامش ' + margin + '% • ' + costMultiplier + '× التكلفة' +
+          '</div>' +
+        '</div>';
+    }
+
+    priceInput.addEventListener('input', updateProfit);
+    costInput.addEventListener('input', updateProfit);
+    updateProfit();
+  })();
+</script>
 
 <%- include('_foot') %>

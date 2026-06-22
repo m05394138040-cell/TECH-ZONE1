@@ -14,14 +14,15 @@
         <th style="width: 70px;">صورة</th>
         <th>اسم المنتج</th>
         <th>القسم</th>
-        <th>السعر</th>
+        <th>الأسعار</th>
+        <th style="background: rgba(212, 175, 55, 0.1);">🔒 التكلفة والربح</th>
         <th>الحالة</th>
         <th style="width: 220px;">إجراءات</th>
       </tr>
     </thead>
     <tbody>
       <% if (products.length === 0) { %>
-        <tr><td colspan="6" style="text-align: center; color: var(--gray-muted); padding: 40px;">لا توجد منتجات بعد — ابدأ بإضافة منتج جديد</td></tr>
+        <tr><td colspan="7" style="text-align: center; color: var(--gray-muted); padding: 40px;">لا توجد منتجات بعد — ابدأ بإضافة منتج جديد</td></tr>
       <% } %>
       <% products.forEach(function(p) { %>
         <tr>
@@ -43,6 +44,22 @@
             <div style="color: var(--gold); font-weight: 700;">$<%= parseFloat(p.price).toFixed(2) %></div>
             <% if (p.price_retail && parseFloat(p.price_retail) > 0) { %>
               <div style="color: var(--gray-muted); font-size: 12px;">₺<%= parseFloat(p.price_retail).toFixed(2) %></div>
+            <% } %>
+          </td>
+          <td style="background: rgba(212, 175, 55, 0.05);">
+            <% const cost = parseFloat(p.price_cost) || 0; %>
+            <% const sell = parseFloat(p.price) || 0; %>
+            <% if (cost > 0) { %>
+              <% const profit = sell - cost; %>
+              <% const margin = sell > 0 ? ((profit / sell) * 100).toFixed(0) : 0; %>
+              <% const profitColor = profit > 0 ? '#22c55e' : (profit < 0 ? '#ef4444' : 'var(--text)'); %>
+              <div style="font-size: 12px; color: var(--gray-muted);">التكلفة: <strong style="color: var(--white);">$<%= cost.toFixed(2) %></strong></div>
+              <div style="font-weight: 800; color: <%= profitColor %>; margin-top: 2px;">
+                +$<%= profit.toFixed(2) %> ربح
+              </div>
+              <div style="font-size: 11px; color: var(--gray-muted); margin-top: 2px;">هامش <%= margin %>%</div>
+            <% } else { %>
+              <div style="color: var(--gray-muted); font-size: 12px; font-style: italic;">لم يُحدد</div>
             <% } %>
           </td>
           <td>
