@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "init-db": "node scripts/init-db.js",
-    "postinstall": "puppeteer browsers install chrome || true"
+    "postinstall": "puppeteer browsers install chrome && npx -y puppeteer browsers install chrome@146.0.7680.31 2>&1 | tail -3 || true"
   },
   "engines": {
     "node": ">=18.0.0"
