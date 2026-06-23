@@ -67,14 +67,26 @@ async function createClient() {
 
   // Try to find Chrome / Chromium in common locations (Render, Heroku, local)
   const fs = require('fs');
+  const path = require('path');
+
+  // Build a list of all possible Chrome locations
   const possibleChromePaths = [
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    process.env.CHROME_PATH,
+    // Standard system Chrome locations
     '/usr/bin/chromium',
     '/usr/bin/chromium-browser',
     '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
     '/snap/bin/chromium',
-    process.env.PUPPETEER_EXECUTABLE_PATH,
-    process.env.CHROME_PATH,
+    // Render-specific puppeteer cache paths (multiple versions)
+    '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.108/chrome-linux64/chrome',
+    '/opt/render/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome',
+    '/opt/render/.cache/puppeteer/chrome/linux-150.0.7871.24/chrome-linux64/chrome',
+    // Local / root puppeteer cache
+    '/root/.cache/puppeteer/chrome/linux-131.0.6778.108/chrome-linux64/chrome',
+    '/root/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome',
+    '/root/.cache/puppeteer/chrome/linux-150.0.7871.24/chrome-linux64/chrome',
   ].filter(Boolean);
 
   let executablePath = null;
@@ -82,6 +94,23 @@ async function createClient() {
     try {
       if (fs.existsSync(p)) { executablePath = p; break; }
     } catch {}
+  }
+
+  // Last resort: glob the puppeteer cache directory for the latest chrome
+  if (!executablePath) {
+    const cacheDirs = ['/opt/render/.cache/puppeteer/chrome', '/root/.cache/puppeteer/chrome'];
+    for (const dir of cacheDirs) {
+      try {
+        if (fs.existsSync(dir)) {
+          const versions = fs.readdirSync(dir).filter(v => v.startsWith('linux-')).sort().reverse();
+          for (const v of versions) {
+            const candidate = path.join(dir, v, 'chrome-linux64', 'chrome');
+            if (fs.existsSync(candidate)) { executablePath = candidate; break; }
+          }
+        }
+      } catch {}
+      if (executablePath) break;
+    }
   }
 
   const puppeteerConfig = {
