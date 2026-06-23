@@ -1377,9 +1377,14 @@ input:focus, textarea:focus, select:focus {
 
 @media (max-width: 768px) {
   .hero-slider {
-    margin: 14px 16px 4px;  /* Normal margin from both sides */
+    /* Use explicit width so the slider is perfectly centered with equal margins on both sides */
+    width: calc(100% - 32px);
+    margin: 14px auto 4px;  /* auto left/right centers it */
     border-radius: 12px;
     aspect-ratio: 16 / 7;
+    /* Reset any LTR direction issues that might break centering in RTL pages */
+    margin-left: auto;
+    margin-right: auto;
   }
   .hero-slider-caption {
     font-size: 14px;

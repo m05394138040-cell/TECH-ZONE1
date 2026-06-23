@@ -19,7 +19,7 @@ router.get('/contact', async (req, res, next) => {
 });
 
 // ===== Home: slider + latest products (paginated) + categories =====
-const PRODUCTS_PER_PAGE = 10;
+const PRODUCTS_PER_PAGE = 12;
 
 router.get('/', async (req, res, next) => {
   try {
