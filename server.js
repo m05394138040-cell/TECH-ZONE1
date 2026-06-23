@@ -80,6 +80,7 @@ app.use(async (req, res, next) => {
 app.use('/', publicRoutes);
 app.use('/', wholesaleRoutes);
 app.use('/admin', adminRoutes);
+app.use('/', require('./routes/bot'));
 
 // ===== 404 =====
 app.use((req, res) => {
@@ -256,6 +257,16 @@ async function ensureSchema() {
     }
     console.log('✅ Database schema OK');
   }
+}
+
+// Initialize WhatsApp bot (non-blocking)
+try {
+  const bot = require('./bot/whatsapp-bot');
+  bot.init().catch((err) => {
+    console.error('⚠️  Bot init error:', err.message);
+  });
+} catch (e) {
+  console.error('⚠️  Could not load bot module:', e.message);
 }
 
 async function start() {

@@ -11,7 +11,11 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: npm install
+    buildCommand: apt-get update && apt-get install -y chromium chromium-driver && npm install
+    # Note: The buildpack approach is more reliable, but we install via apt for simplicity
+    # For proper Chrome install, switch to this buildpack:
+    #   - https://github.com/jontewks/puppeteer-heroku-buildpack
+    # Add via Render dashboard: Settings → Build & Deploy → Add buildpack
     startCommand: npm start
     healthCheckPath: /
     autoDeploy: true

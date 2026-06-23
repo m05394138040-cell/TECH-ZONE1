@@ -791,17 +791,37 @@ router.post('/wholesale-applications/:id/approve', async (req, res, next) => {
       ]
     );
 
+    // Send via WhatsApp bot if connected
+    let botSent = false;
+    let botError = null;
+    try {
+      const bot = require('../bot/whatsapp-bot');
+      const waMessage = `🎉 أهلاً وسهلاً ${app.name}!\n\nشكراً لك على تقديم طلب الشراكة مع TECH ZONE.\n\n✅ تم قبول طلبك بنجاح!\n\nيمكنك الآن تصفح جميع المنتجات بأسعار الجملة الحصرية عبر الرابط:\n${siteUrl}\n\nاسم المستخدم: ${app.username}\nكلمة المرور: (التي اخترتها عند التقديم)\n\nنتمنى لك تجربة تسوق ممتعة! 🛍️`;
+      const result = await bot.sendMessage(app.phone, waMessage);
+      botSent = result.ok;
+      if (!result.ok) botError = result.error;
+    } catch (e) {
+      botError = e.message;
+    }
+
     // Re-fetch applications and show success
     const applications = await queryAll("SELECT * FROM wholesale_applications ORDER BY created_at DESC");
+    let successMsg = `تمت الموافقة على طلب ${app.name} بنجاح! تم إنشاء حسابه وإرسال إشعار داخل الموقع.`;
+    if (botSent) {
+      successMsg += ` ✅ تم إرسال رسالة واتساب تلقائياً إلى ${app.phone}.`;
+    } else {
+      successMsg += ` ⚠️ لم يتم إرسال الواتساب (${botError || 'البوت غير متصل'}) - يمكنك استخدام الزر اليدوي.`;
+    }
     res.render('admin/wholesale-applications', {
       title: 'طلبات الشركاء',
       applications,
       filter: 'all',
       error: null,
-      success: `تمت الموافقة على طلب ${app.name} بنجاح! تم إنشاء حسابه.`,
+      success: successMsg,
       waLink,
       waPhone: cleanPhone,
       waName: app.name,
+      botSent,
       active: 'wholesale-applications',
     });
   } catch (err) {

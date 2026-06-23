@@ -20,6 +20,8 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.2.0",
     "pg": "^8.13.1",
-    "puppeteer-core": "^25.1.0"
+    "puppeteer-core": "^25.1.0",
+    "qrcode": "^1.5.4",
+    "whatsapp-web.js": "^1.34.7"
   }
 }
