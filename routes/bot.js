@@ -9,7 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const bot = require('../bot/whatsapp-bot');
-const { query } = require('../config/db');
+const { query, queryAll } = require('../config/db');
 
 function requireAdmin(req, res, next) {
   if (res.locals && res.locals.isAdmin) return next();
@@ -20,7 +20,7 @@ router.get('/admin/bot', requireAdmin, async (req, res, next) => {
   try {
     const status = bot.getStatus();
     // Get bot config from settings
-    const cfg = await query(
+    const cfg = await queryAll(
       "SELECT key, value FROM settings WHERE key IN ('bot_name', 'bot_enabled', 'whatsapp_business_number')"
     );
     const config = {};
