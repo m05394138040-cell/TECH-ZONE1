@@ -778,6 +778,19 @@ router.post('/wholesale-applications/:id/approve', async (req, res, next) => {
     const cleanPhone = (app.phone || '').replace(/[^0-9]/g, '');
     const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMessage)}` : null;
 
+    // Create in-app notification for the applicant
+    await query(
+      `INSERT INTO notifications (phone, type, title, message, icon, link)
+       VALUES ($1, 'wholesale_approved', $2, $3, $4, $5)`,
+      [
+        app.phone,
+        'تم قبول طلبك كشريك جملة! 🎉',
+        `أهلاً ${app.name}!\n\nيسعدنا إبلاغك بأنه تم قبول طلبك للانضمام كشريك جملة في TECH ZONE.\n\nاسم المستخدم: ${app.username}\nالرابط: ${siteUrl}\n\nيمكنك الآن تسجيل الدخول والتصفح بأسعار الجملة الحصرية.`,
+        '🎉',
+        '/wholesale-login',
+      ]
+    );
+
     // Re-fetch applications and show success
     const applications = await queryAll("SELECT * FROM wholesale_applications ORDER BY created_at DESC");
     res.render('admin/wholesale-applications', {
@@ -828,16 +841,104 @@ router.post('/wholesale-applications/:id/reject', async (req, res, next) => {
       [id]
     );
 
+    // Create in-app notification for the rejected applicant
+    await query(
+      `INSERT INTO notifications (phone, type, title, message, icon, link)
+       VALUES ($1, 'wholesale_rejected', $2, $3, '😔', '/wholesale-apply')`,
+      [
+        app.phone,
+        'نعتذر، لم يتم قبول طلبك 😔',
+        `مرحباً ${app.name}،\n\nنشكرك على اهتمامك بالانضمام كشريك جملة في TECH ZONE.\n\nبعد مراجعة طلبك، نأسف لإبلاغك بأنه لم يتم قبول الطلب حالياً لعدم استيفاء المتطلبات.\n\nيمكنك إعادة التقديم لاحقاً أو التواصل معنا للمزيد من المعلومات.`,
+      ]
+    );
+
     const applications = await queryAll("SELECT * FROM wholesale_applications ORDER BY created_at DESC");
     res.render('admin/wholesale-applications', {
       title: 'طلبات الشركاء',
       applications,
       filter: 'all',
       error: null,
-      success: `تم رفض طلب ${app.name}. ❌`,
+      success: `تم رفض طلب ${app.name}. ❌ سيتم إبلاغه عبر إشعار في الموقع.`,
       rejected: true,
       active: 'wholesale-applications',
     });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+// ===== Admin: Notifications =====
+router.get('/notifications', async (req, res, next) => {
+  try {
+    const phone = (req.query.phone || '').trim();
+    let notifications = [];
+    if (phone) {
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      notifications = await queryAll(
+        `SELECT * FROM notifications
+          WHERE phone = $1 OR phone LIKE $2 OR REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', '') LIKE $2
+          ORDER BY created_at DESC
+          LIMIT 100`,
+        [phone, '%' + cleanPhone + '%']
+      );
+    } else {
+      notifications = await queryAll(
+        `SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100`
+      );
+    }
+    const totalCount = notifications.length;
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+    res.render('admin/notifications', {
+      title: 'الإشعارات',
+      notifications,
+      phone,
+      totalCount,
+      unreadCount,
+      error: null,
+      success: null,
+      active: 'notifications',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/notifications/:id/delete', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    await query('DELETE FROM notifications WHERE id = $1', [id]);
+    res.redirect('/admin/notifications');
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/notifications/broadcast', async (req, res, next) => {
+  try {
+    const { title, message, type, icon } = req.body;
+    if (!title || !message) {
+      const notifications = await queryAll("SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100");
+      return res.render('admin/notifications', {
+        title: 'الإشعارات',
+        notifications,
+        phone: '',
+        totalCount: notifications.length,
+        unreadCount: notifications.filter(n => !n.is_read).length,
+        error: 'العنوان والرسالة مطلوبان',
+        success: null,
+        active: 'notifications',
+      });
+    }
+    // Send to all wholesale users
+    const users = await queryAll("SELECT phone FROM wholesale_users WHERE is_active = TRUE AND phone IS NOT NULL AND phone != ''");
+    for (const u of users) {
+      await query(
+        `INSERT INTO notifications (phone, type, title, message, icon) VALUES ($1, $2, $3, $4, $5)`,
+        [u.phone, type || 'broadcast', title, message, icon || '📢']
+      );
+    }
+    res.redirect('/admin/notifications?success=broadcast');
   } catch (err) {
     next(err);
   }

@@ -162,4 +162,101 @@ router.post('/wholesale-apply', async (req, res, next) => {
   }
 });
 
+// ===== Notifications inbox (for applicants) =====
+router.get('/wholesale-notifications', async (req, res, next) => {
+  try {
+    res.render('wholesale-notifications', {
+      title: 'صندوق الإشعارات',
+      phone: '',
+      notifications: [],
+      error: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/wholesale-notifications', async (req, res, next) => {
+  try {
+    const phone = (req.body.phone || '').trim();
+    if (!phone) {
+      return res.render('wholesale-notifications', {
+        title: 'صندوق الإشعارات',
+        phone: '',
+        notifications: [],
+        error: 'يرجى إدخال رقم الهاتف',
+      });
+    }
+    // Normalize: try multiple formats
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const notifications = await queryAll(
+      `SELECT * FROM notifications
+        WHERE phone = $1 OR phone LIKE $2 OR REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', '') LIKE $2
+        ORDER BY created_at DESC
+        LIMIT 50`,
+      [phone, '%' + cleanPhone + '%']
+    );
+    res.render('wholesale-notifications', {
+      title: 'صندوق الإشعارات',
+      phone,
+      notifications,
+      error: null,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// JSON API for fetching notifications
+router.get('/api/notifications', async (req, res, next) => {
+  try {
+    const phone = (req.query.phone || '').trim();
+    if (!phone) {
+      return res.json({ notifications: [], unreadCount: 0 });
+    }
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const notifications = await queryAll(
+      `SELECT * FROM notifications
+        WHERE phone = $1 OR phone LIKE $2 OR REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', '') LIKE $2
+        ORDER BY created_at DESC
+        LIMIT 50`,
+      [phone, '%' + cleanPhone + '%']
+    );
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+    res.json({ notifications, unreadCount });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Mark notification as read
+router.post('/api/notifications/:id/read', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return res.json({ ok: false });
+    await query('UPDATE notifications SET is_read = TRUE WHERE id = $1', [id]);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Mark all notifications for a phone as read
+router.post('/api/notifications/mark-all-read', async (req, res, next) => {
+  try {
+    const phone = (req.body.phone || '').trim();
+    if (!phone) return res.json({ ok: false });
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    await query(
+      `UPDATE notifications SET is_read = TRUE
+        WHERE phone = $1 OR phone LIKE $2 OR REPLACE(REPLACE(REPLACE(phone, ' ', ''), '-', ''), '+', '') LIKE $2`,
+      [phone, '%' + cleanPhone + '%']
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 module.exports = router;

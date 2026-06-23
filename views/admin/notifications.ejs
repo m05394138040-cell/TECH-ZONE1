@@ -1,0 +1,75 @@
+<%- include('_head') %>
+
+<% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+<% if (success || (typeof query !== 'undefined' && query && query.success === 'broadcast')) { %>
+  <div class="success-msg">✅ تم إرسال الإشعار لجميع أصحاب المحلات النشطين</div>
+<% } %>
+
+<div class="form-section">
+  <h2>📬 إدارة الإشعارات</h2>
+  <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
+    هنا تظهر جميع الإشعارات المرسلة للأعضاء (قبول/رفض طلبات، إشعارات جماعية). يمكنك أيضاً إرسال إشعار جماعي لجميع أصحاب المحلات.
+  </p>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 18px;">
+    <div style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(212, 175, 55, 0.02)); padding: 14px; border-radius: 10px; border: 1px solid var(--gold);">
+      <div style="color: var(--gold); font-size: 28px; font-weight: 800;"><%= totalCount %></div>
+      <div style="color: var(--gray-text); font-size: 13px;">إجمالي الإشعارات</div>
+    </div>
+    <div style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(251, 191, 36, 0.02)); padding: 14px; border-radius: 10px; border: 1px solid #fbbf24;">
+      <div style="color: #fbbf24; font-size: 28px; font-weight: 800;"><%= unreadCount %></div>
+      <div style="color: var(--gray-text); font-size: 13px;">غير مقروء</div>
+    </div>
+  </div>
+
+  <form method="GET" action="/admin/notifications" style="display: flex; gap: 8px; margin-bottom: 18px;">
+    <input type="tel" name="phone" value="<%= phone %>" placeholder="ابحث برقم الهاتف (اختياري)" style="flex: 1; padding: 10px 14px; border: 1.5px solid #555; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; font-family: inherit; direction: ltr; text-align: right;" dir="ltr" />
+    <button type="submit" class="btn btn-secondary">🔍 بحث</button>
+    <% if (phone) { %>
+      <a href="/admin/notifications" class="btn btn-secondary">✕ مسح</a>
+    <% } %>
+  </form>
+
+  <h3 style="color: var(--gold); margin: 20px 0 12px;">📢 إرسال إشعار جماعي لأصحاب المحلات</h3>
+  <form method="POST" action="/admin/notifications/broadcast" style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 10px; margin-bottom: 24px;">
+    <div style="display: grid; grid-template-columns: 1fr 100px; gap: 8px; margin-bottom: 8px;">
+      <input type="text" name="title" placeholder="عنوان الإشعار" required style="padding: 10px 14px; border: 1.5px solid #555; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; font-family: inherit;" />
+      <input type="text" name="icon" placeholder="📢" value="📢" maxlength="4" style="padding: 10px; text-align: center; border: 1.5px solid #555; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; font-size: 18px;" />
+    </div>
+    <textarea name="message" rows="3" placeholder="نص الرسالة..." required style="width: 100%; padding: 10px 14px; border: 1.5px solid #555; border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; font-family: inherit; margin-bottom: 8px; resize: vertical;"></textarea>
+    <input type="hidden" name="type" value="broadcast" />
+    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, var(--gold), var(--gold-dark));" data-confirm="سيتم إرسال هذا الإشعار لجميع أصحاب المحلات النشطين. متابعة؟">
+      📨 إرسال للجميع
+    </button>
+  </form>
+
+  <h3 style="color: var(--gold); margin: 20px 0 12px;">📋 الإشعارات الأخيرة</h3>
+  <% if (notifications.length === 0) { %>
+    <div style="text-align: center; padding: 40px; color: var(--gray-muted);">لا توجد إشعارات</div>
+  <% } else { %>
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <% notifications.forEach(function(n) { %>
+        <div style="background: var(--dark-card); border: 1px solid <%= n.is_read ? 'var(--black-border)' : 'var(--gold)' %>; border-radius: 10px; padding: 12px 14px; display: flex; align-items: flex-start; gap: 12px;">
+          <div style="font-size: 24px; flex-shrink: 0;"><%= n.icon || '🔔' %></div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <strong style="color: var(--white); font-size: 14px;"><%= n.title %></strong>
+              <% if (!n.is_read) { %><span style="background: var(--gold); color: #000; font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 800;">جديد</span><% } %>
+            </div>
+            <div style="color: var(--gray-text); font-size: 13px; white-space: pre-wrap; word-wrap: break-word; margin-bottom: 6px;"><%= n.message %></div>
+            <div style="color: var(--gray-muted); font-size: 11px;">
+              📱 <span dir="ltr"><%= n.phone %></span>
+              • <%= n.type %>
+              • <%= new Date(n.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) %>
+            </div>
+          </div>
+          <form method="POST" action="/admin/notifications/<%= n.id %>/delete" style="flex-shrink: 0;">
+            <button type="submit" class="btn btn-danger btn-sm" data-confirm="حذف هذا الإشعار؟">🗑️</button>
+          </form>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('_foot') %>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title><%= title %> | <%= typeof siteName !== 'undefined' ? siteName : 'TECH ZONE' %></title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .notif-page {
+      min-height: 100vh;
+      padding: 30px 16px;
+      background: #fdfaf3 url('/img/marble.jpg') center/cover fixed;
+    }
+    .notif-card {
+      max-width: 680px;
+      margin: 0 auto;
+      background: rgba(20, 20, 20, 0.96);
+      color: #fff;
+      border: 2px solid var(--gold);
+      border-radius: 24px;
+      padding: 28px 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    .notif-card h1 {
+      color: var(--gold);
+      font-size: 24px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .notif-card .subtitle {
+      color: #ccc;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    .phone-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .phone-form input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1.5px solid #444;
+      border-radius: 10px;
+      background: #1a1a1a;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      direction: ltr;
+      text-align: right;
+    }
+    .phone-form input:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .phone-form button {
+      padding: 0 22px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .phone-form button:hover { transform: translateY(-1px); }
+    .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+    .notif-empty {
+      text-align: center;
+      padding: 50px 20px;
+      color: #aaa;
+    }
+    .notif-empty .icon { font-size: 56px; margin-bottom: 12px; }
+    .notif-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .notif-item {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 14px 16px;
+      border-right: 4px solid var(--gold);
+      transition: all 0.15s;
+    }
+    .notif-item.unread {
+      background: rgba(212, 175, 55, 0.08);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.2);
+    }
+    .notif-item.approved { border-right-color: #22c55e; }
+    .notif-item.approved.unread { box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3); }
+    .notif-item.rejected { border-right-color: #ef4444; }
+    .notif-item.rejected.unread { box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.3); }
+    .notif-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .notif-icon {
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+    .notif-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--white);
+      flex: 1;
+    }
+    .notif-time {
+      font-size: 11px;
+      color: #888;
+    }
+    .notif-message {
+      color: #ccc;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .notif-link {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--gold);
+      font-size: 13px;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .notif-link:hover { text-decoration: underline; }
+    .unread-badge {
+      background: var(--gold);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-right: 6px;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 18px;
+      color: #aaa;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <div class="notif-page">
+    <div class="notif-card">
+      <h1>📬 صندوق الإشعارات</h1>
+      <p class="subtitle">أدخل رقم هاتفك للاطلاع على آخر التحديثات</p>
+
+      <% if (error) { %>
+        <div class="alert alert-error">⚠️ <%= error %></div>
+      <% } %>
+
+      <form class="phone-form" method="POST" action="/wholesale-notifications">
+        <input type="tel" name="phone" value="<%= phone %>" placeholder="+90 555 123 4567" required autocomplete="tel" />
+        <button type="submit">🔍 عرض</button>
+      </form>
+
+      <% if (phone && notifications.length === 0) { %>
+        <div class="notif-empty">
+          <div class="icon">📭</div>
+          <h3 style="color: var(--white); margin-bottom: 8px;">لا توجد إشعارات</h3>
+          <p>لم نجد إشعارات لهذا الرقم. إذا كنت قدّمت طلباً، فستظهر الإشعارات هنا بعد معالجته.</p>
+        </div>
+      <% } else if (notifications.length > 0) { %>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding: 8px 12px; background: rgba(212, 175, 55, 0.1); border-radius: 8px;">
+          <span style="color: var(--gold); font-size: 14px; font-weight: 700;">
+            <%= notifications.length %> إشعار
+            <% const unread = notifications.filter(n => !n.is_read).length; %>
+            <% if (unread > 0) { %> • <span style="color: #fbbf24;"><%= unread %> غير مقروء</span><% } %>
+          </span>
+          <% if (unread > 0) { %>
+            <button type="button" onclick="markAllRead('<%= phone %>')" style="background: transparent; border: 1px solid var(--gold); color: var(--gold); padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+              ✓ تحديد الكل كمقروء
+            </button>
+          <% } %>
+        </div>
+
+        <div class="notif-list">
+          <% notifications.forEach(function(n) { %>
+            <% const typeClass = n.type === 'wholesale_approved' ? 'approved' : (n.type === 'wholesale_rejected' ? 'rejected' : ''); %>
+            <div class="notif-item <%= typeClass %> <%= !n.is_read ? 'unread' : '' %>" data-id="<%= n.id %>">
+              <div class="notif-header">
+                <div class="notif-icon"><%= n.icon || '🔔' %></div>
+                <div class="notif-title">
+                  <%= n.title %>
+                  <% if (!n.is_read) { %><span class="unread-badge">جديد</span><% } %>
+                </div>
+                <div class="notif-time">
+                  <%= new Date(n.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) %>
+                </div>
+              </div>
+              <div class="notif-message"><%= n.message %></div>
+              <% if (n.link) { %>
+                <a href="<%= n.link %>" class="notif-link" onclick="markRead(<%= n.id %>)">← الذهاب</a>
+              <% } %>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <a href="/wholesale-login" class="back-link">← العودة لتسجيل الدخول</a>
+    </div>
+  </div>
+  <script>
+    async function markRead(id) {
+      try {
+        await fetch('/api/notifications/' + id + '/read', { method: 'POST' });
+      } catch (e) { /* ignore */ }
+    }
+    async function markAllRead(phone) {
+      try {
+        const r = await fetch('/api/notifications/mark-all-read', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone: phone }),
+        });
+        if (r.ok) location.reload();
+      } catch (e) { /* ignore */ }
+    }
+  </script>
+</body>
+</html>
