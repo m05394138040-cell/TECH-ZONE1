@@ -1,20 +1,5 @@
 <%- include('partials/header') %>
 
-<section class="hero">
-  <img src="/img/logo.png?v=2" alt="<%= siteName %>" class="hero-logo" />
-  <p>اكسسوارات الأجهزة الذكية — جميع المنتجات متوفرة بأسعار تنافسية</p>
-</section>
-
-<% if (settings.ticker_enabled === 'true' || !settings.ticker_enabled) { %>
-  <% if (settings.ticker_text) { %>
-    <div class="news-ticker" style="background: <%= settings.ticker_bg_color || '#0a0a0a' %>;">
-      <div class="ticker-content" style="color: <%= settings.ticker_color || '#ffffff' %>;">
-        <span class="ticker-text"><%= settings.ticker_text %></span>
-      </div>
-    </div>
-  <% } %>
-<% } %>
-
 <% if (sliderImages && sliderImages.length > 0) { %>
   <section class="hero-slider" id="heroSlider" aria-label="سلايدر العروض">
     <div class="hero-slider-viewport">
@@ -40,15 +25,26 @@
   </section>
 <% } %>
 
+<section class="hero">
+  <img src="/img/logo.png?v=2" alt="<%= siteName %>" class="hero-logo" />
+  <p>اكسسوارات الأجهزة الذكية — جميع المنتجات متوفرة بأسعار تنافسية</p>
+</section>
+
+<% if (settings.ticker_enabled === 'true' || !settings.ticker_enabled) { %>
+  <% if (settings.ticker_text) { %>
+    <div class="news-ticker" style="background: <%= settings.ticker_bg_color || '#0a0a0a' %>;">
+      <div class="ticker-content" style="color: <%= settings.ticker_color || '#ffffff' %>;">
+        <span class="ticker-text"><%= settings.ticker_text %></span>
+      </div>
+    </div>
+  <% } %>
+<% } %>
+
 <% if (latestProducts && latestProducts.length > 0) { %>
   <section class="latest-products-section" aria-label="أحدث المنتجات">
     <div class="latest-products-header">
       <h2 class="section-title latest-title" id="latest">أحدث المنتجات</h2>
-      <% if (totalPages > 1) { %>
-        <div class="latest-meta">
-          <span class="latest-page-info">صفحة <%= currentPage %> من <%= totalPages %></span>
-        </div>
-      <% } %>
+
     </div>
 
     <div class="latest-products-grid">
