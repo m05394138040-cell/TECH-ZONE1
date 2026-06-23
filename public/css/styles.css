@@ -1434,6 +1434,8 @@ input:focus, textarea:focus, select:focus {
   height: 100%;
   display: flex;
   align-items: center;
+  /* Force LTR layout so track starts at the left edge (RTL pages push flex children to the right) */
+  direction: ltr;
   /* Subtle edge fade so text doesn't visually clip */
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
@@ -1442,10 +1444,9 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  /* Force LTR layout so animation math works regardless of page direction */
-  direction: ltr;
   animation: ticker-scroll 25s linear infinite;
   will-change: transform;
+  flex-shrink: 0;
 }
 .ticker-text {
   display: inline-block;
