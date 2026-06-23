@@ -36,7 +36,7 @@
         <a href="/" class="nav-link">الرئيسية</a>
         <a href="/#categories" class="nav-link">الأقسام</a>
         <% if (isWholesale) { %>
-          <a href="/wholesale-logout" class="nav-link wholesale-badge" title="تسجيل خروج">🏪 <%= wholesaleUsername %> ✕</a>
+          <a href="/wholesale-logout" class="nav-link wholesale-badge" title="تسجيل خروج (حساب: <%= wholesaleUsername %>)">🚪 تسجيل الخروج</a>
         <% } else { %>
           <a href="/wholesale-login" class="nav-link">🔐 تسجيل الدخول</a>
         <% } %>
