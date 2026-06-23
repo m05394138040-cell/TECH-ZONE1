@@ -353,7 +353,12 @@
   let msgTimer = null;
   let isShowing = false;
   let minVisibleTimer = null;
-  const MIN_VISIBLE_MS = 600;
+  let failSafeTimer = null;
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  // Mobile: shorter minimum visible time, faster animations off
+  const MIN_VISIBLE_MS = isMobile ? 150 : 300;
+  const STATUS_CYCLE_MS = isMobile ? 1800 : 1200;
+  const FAILSAFE_MS = isMobile ? 4000 : 8000;
 
   function setStatus(text) {
     if (statusEl) statusEl.textContent = text;
@@ -363,6 +368,17 @@
     if (!isShowing) return;
     msgIdx = (msgIdx + 1) % messages.length;
     setStatus(messages[msgIdx]);
+  }
+
+  function startStatusCycle() {
+    if (msgTimer) clearInterval(msgTimer);
+    msgTimer = setInterval(cycleStatus, STATUS_CYCLE_MS);
+  }
+
+  function clearAllTimers() {
+    if (minVisibleTimer) { clearTimeout(minVisibleTimer); minVisibleTimer = null; }
+    if (failSafeTimer) { clearTimeout(failSafeTimer); failSafeTimer = null; }
+    if (msgTimer) { clearInterval(msgTimer); msgTimer = null; }
   }
 
   function showLoader(text) {
@@ -376,23 +392,22 @@
     loader.setAttribute('aria-hidden', 'false');
     setStatus(text || messages[0]);
     msgIdx = 0;
-    if (msgTimer) clearInterval(msgTimer);
-    msgTimer = setInterval(cycleStatus, 1200);
+    startStatusCycle();
+    // Fail-safe: never stay longer than FAILSAFE_MS
+    failSafeTimer = setTimeout(() => {
+      if (isShowing) hideLoader();
+    }, FAILSAFE_MS);
   }
 
   function hideLoader() {
     if (!isShowing) return;
-    if (minVisibleTimer) {
-      clearTimeout(minVisibleTimer);
-      minVisibleTimer = null;
-    }
+    clearAllTimers();
     isShowing = false;
     loader.classList.add('is-hiding');
     setTimeout(() => {
       loader.classList.remove('is-visible', 'is-hiding');
       loader.setAttribute('aria-hidden', 'true');
-      if (msgTimer) { clearInterval(msgTimer); msgTimer = null; }
-    }, 500);
+    }, 350);
   }
 
   function scheduleMinHide() {
@@ -400,13 +415,22 @@
     minVisibleTimer = setTimeout(hideLoader, MIN_VISIBLE_MS);
   }
 
-  // ===== 1. Page load =====
+  // ===== 1. Page load - hide ASAP (DOMContentLoaded, faster than window.load) =====
   showLoader('جاري التحميل');
-  const onReady = () => scheduleMinHide();
-  if (document.readyState === 'complete') {
+  const onReady = () => {
+    // Small minimum visible time so user sees the loader (no flash)
+    scheduleMinHide();
+  };
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
     onReady();
   } else {
-    window.addEventListener('load', onReady, { once: true });
+    document.addEventListener('DOMContentLoaded', () => onReady(), { once: true });
+  }
+  // Backup: also try window.load in case DOMContentLoaded already fired
+  if (document.readyState !== 'complete') {
+    window.addEventListener('load', () => {
+      if (isShowing) scheduleMinHide();
+    }, { once: true });
   }
 
   // ===== 2. Link clicks (intercept internal navigation) =====
@@ -414,7 +438,6 @@
     const link = e.target.closest('a[href]');
     if (!link) return;
     const href = link.getAttribute('href');
-    // Skip external, hash, target=_blank, javascript:, mailto:, tel:
     if (
       !href ||
       href.startsWith('#') ||
@@ -427,10 +450,12 @@
     ) {
       return;
     }
-    // Skip admin nav (admin has its own UX)
+    // Skip admin nav
     if (href.startsWith('/admin')) return;
+    // Skip if loader already showing (don't double-trigger)
+    if (isShowing) return;
     showLoader('جاري الانتقال');
-    // Browser will navigate; loader fades out naturally when new page loads
+    // Browser will navigate; loader hides on new page load
   });
 
   // ===== 3. Form submissions =====
@@ -441,13 +466,16 @@
     showLoader('جاري الإرسال');
   });
 
-  // ===== 4. Show on bfcache restore =====
+  // ===== 4. Hide on bfcache restore =====
   window.addEventListener('pageshow', (e) => {
     if (e.persisted) hideLoader();
   });
 
-  // ===== 5. Hide if page fails to fully load after 10s (failsafe) =====
-  setTimeout(() => { if (isShowing) hideLoader(); }, 10000);
+  // ===== 5. Listen for ANY navigation completion via beforeunload =====
+  window.addEventListener('beforeunload', () => {
+    // Reset fail-safe so old page's timer doesn't affect new page
+    clearAllTimers();
+  });
 
   // Expose for AJAX callers
   window.__showLoader = showLoader;

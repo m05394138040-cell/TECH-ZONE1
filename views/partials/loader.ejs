@@ -364,16 +364,30 @@
     100% { transform: translateX(400%); }
   }
 
-  /* Mobile adjustments */
-  @media (max-width: 480px) {
-    .loader-logo { width: 90px; height: 90px; }
-    .loader-mark { width: 64px; height: 64px; }
-    .loader-mark-tz { font-size: 24px; }
-    .loader-orbit-1 .loader-dot { transform: translateX(60px); }
-    .loader-orbit-2 .loader-dot { transform: translateX(48px); }
-    .loader-orbit-3 .loader-dot { transform: translateX(72px); }
-    .loader-brand-text { font-size: 15px; letter-spacing: 3px; }
+  /* Mobile adjustments — lighter, faster animations for smooth perf */
+  @media (max-width: 768px) {
+    /* Disable heavy background animations */
+    .global-loader.is-visible .loader-backdrop { animation: none; }
+    /* Hide particles on mobile (12 elements = expensive) */
+    .loader-particles { display: none; }
+    /* Hide light rays on mobile */
+    .loader-rays { display: none; }
+    /* Single ring instead of two */
+    .loader-glow-ring-2 { display: none; }
+    /* Hide the slow third orbit */
+    .loader-orbit-3 { display: none; }
+    /* Speed up remaining animations */
+    .loader-orbit-1 { animation-duration: 2s !important; }
+    .loader-orbit-2 { animation-duration: 2.5s !important; }
+    /* Smaller logo */
+    .loader-logo { width: 80px; height: 80px; }
+    .loader-mark { width: 56px; height: 56px; }
+    .loader-mark-tz { font-size: 22px; }
+    .loader-orbit-1 .loader-dot { transform: translateX(50px); }
+    .loader-orbit-2 .loader-dot { transform: translateX(40px); }
+    .loader-brand-text { font-size: 14px; letter-spacing: 3px; }
     .loader-progress { width: 140px; }
+    .loader-stage { gap: 18px; }
   }
 
   /* Respect reduced motion */
