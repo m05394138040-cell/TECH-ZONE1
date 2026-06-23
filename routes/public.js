@@ -38,8 +38,10 @@ router.get('/', async (req, res, next) => {
     const safeOffset = (currentPage - 1) * PRODUCTS_PER_PAGE;
 
     // Fetch latest products (don't include price_cost — admin only)
+    // We select created_at so the view can show the 'جديد' badge for products < 24h old
     const latestProducts = await queryAll(
       `SELECT p.id, p.name, p.price, p.price_retail, p.image_type, p.available,
+              p.created_at,
               c.name AS category_name, c.slug AS category_slug
          FROM products p
          JOIN categories c ON c.id = p.category_id

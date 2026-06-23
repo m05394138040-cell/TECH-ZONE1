@@ -43,27 +43,22 @@
 <% if (latestProducts && latestProducts.length > 0) { %>
   <section class="latest-products-section" aria-label="أحدث المنتجات">
     <div class="latest-products-header">
-      <h2 class="section-title latest-title" id="latest">
-        <span class="latest-icon">🆕</span>
-        أحدث المنتجات
-      </h2>
-      <div class="latest-meta">
-        <span class="latest-count">
-          <% if (totalProducts === 1) { %>
-            منتج واحد
-          <% } else { %>
-            <%= totalProducts %> منتج
-          <% } %>
-        </span>
-        <% if (totalPages > 1) { %>
+      <h2 class="section-title latest-title" id="latest">أحدث المنتجات</h2>
+      <% if (totalPages > 1) { %>
+        <div class="latest-meta">
           <span class="latest-page-info">صفحة <%= currentPage %> من <%= totalPages %></span>
-        <% } %>
-      </div>
+        </div>
+      <% } %>
     </div>
 
     <div class="latest-products-grid">
+      <% const nowMs = Date.now(); %>
       <% latestProducts.forEach(function(p) { %>
         <% const dp = displayPrice(p); %>
+        <%# Show 'جديد' badge only if product was added within the last 24 hours %>
+        <% const createdMs = new Date(p.created_at).getTime(); %>
+        <% const ageHours = (nowMs - createdMs) / (1000 * 60 * 60); %>
+        <% const isNew = ageHours < 24; %>
         <a href="/product/<%= p.id %>" class="latest-product-card">
           <div class="latest-product-image">
             <% if (p.image_type) { %>
@@ -71,7 +66,9 @@
             <% } else { %>
               <div class="latest-product-placeholder">📦</div>
             <% } %>
-            <span class="latest-product-badge">جديد</span>
+            <% if (isNew) { %>
+              <span class="latest-product-badge">جديد</span>
+            <% } %>
           </div>
           <div class="latest-product-body">
             <div class="latest-product-name"><%= p.name %></div>
