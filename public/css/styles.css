@@ -1440,7 +1440,7 @@ input:focus, textarea:focus, select:focus {
 .ticker-text {
   display: inline-block;
   white-space: nowrap;
-  padding-right: 100%;
+  padding-left: 100%;
   font-family: 'Aref Ruqaa', 'Cairo', serif;
   font-size: 18px;
   font-weight: 700;
@@ -1449,8 +1449,8 @@ input:focus, textarea:focus, select:focus {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 @keyframes ticker-scroll {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* ---------- Empty State ---------- */
