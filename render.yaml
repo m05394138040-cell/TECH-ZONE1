@@ -12,7 +12,6 @@ services:
     plan: free
     region: oregon
     buildCommand: npm install
-    # Chrome 146 (for whatsapp-web.js) is auto-installed by the puppeteer postinstall hook
     startCommand: npm start
     healthCheckPath: /
     autoDeploy: true

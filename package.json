@@ -6,8 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "init-db": "node scripts/init-db.js",
-    "postinstall": "npx puppeteer browsers install chrome@146.0.7680.31 2>&1 | tail -5"
+    "init-db": "node scripts/init-db.js"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -20,9 +19,6 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.2.0",
-    "pg": "^8.13.1",
-    "puppeteer": "^25.2.0",
-    "qrcode": "^1.5.4",
-    "whatsapp-web.js": "^1.34.7"
+    "pg": "^8.13.1"
   }
 }
