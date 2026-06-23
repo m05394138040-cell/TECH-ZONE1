@@ -1442,12 +1442,17 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: center;
   white-space: nowrap;
+  /* Force LTR layout so animation math works regardless of page direction */
+  direction: ltr;
   animation: ticker-scroll 25s linear infinite;
   will-change: transform;
 }
 .ticker-text {
   display: inline-block;
   flex-shrink: 0;
+  /* Keep Arabic text rendering correctly inside each span */
+  direction: rtl;
+  unicode-bidi: isolate;
   font-family: 'El Messiri', 'Reem Kufi', 'Cairo', sans-serif;
   font-size: 19px;
   font-weight: 600;
