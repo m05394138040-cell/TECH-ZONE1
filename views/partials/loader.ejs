@@ -1,0 +1,405 @@
+<!-- Global Loading Screen -->
+<div id="globalLoader" class="global-loader" aria-hidden="true" role="status" aria-label="جاري التحميل">
+  <div class="loader-backdrop"></div>
+
+  <!-- Floating particles in the background -->
+  <div class="loader-particles" aria-hidden="true">
+    <span class="lp"></span><span class="lp"></span><span class="lp"></span>
+    <span class="lp"></span><span class="lp"></span><span class="lp"></span>
+    <span class="lp"></span><span class="lp"></span><span class="lp"></span>
+    <span class="lp"></span><span class="lp"></span><span class="lp"></span>
+  </div>
+
+  <!-- Light rays from behind the logo -->
+  <div class="loader-rays" aria-hidden="true">
+    <div class="ray r1"></div>
+    <div class="ray r2"></div>
+    <div class="ray r3"></div>
+    <div class="ray r4"></div>
+  </div>
+
+  <!-- Main loader stage -->
+  <div class="loader-stage">
+    <!-- Logo with glow ring -->
+    <div class="loader-logo">
+      <div class="loader-glow-ring"></div>
+      <div class="loader-glow-ring loader-glow-ring-2"></div>
+      <div class="loader-mark">
+        <span class="loader-mark-tz">TZ</span>
+        <span class="loader-mark-dot"></span>
+      </div>
+    </div>
+
+    <!-- Orbiting dots -->
+    <div class="loader-orbit loader-orbit-1">
+      <div class="loader-dot"></div>
+    </div>
+    <div class="loader-orbit loader-orbit-2">
+      <div class="loader-dot"></div>
+    </div>
+    <div class="loader-orbit loader-orbit-3">
+      <div class="loader-dot"></div>
+    </div>
+
+    <!-- Brand name with shimmer -->
+    <div class="loader-brand">
+      <span class="loader-brand-text" data-text="TECH ZONE">TECH ZONE</span>
+    </div>
+
+    <!-- Status text (changes via JS) -->
+    <div class="loader-status" id="loaderStatus">جاري التحميل</div>
+
+    <!-- Progress bar (optional, JS-driven) -->
+    <div class="loader-progress">
+      <div class="loader-progress-bar" id="loaderProgressBar"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ============================================
+     Global Loader — Premium feel
+     ============================================ */
+  .global-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  .global-loader.is-visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .global-loader.is-hiding {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Dark gradient backdrop */
+  .loader-backdrop {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at center, rgba(45, 30, 10, 0.85) 0%, rgba(0, 0, 0, 0.96) 70%),
+      linear-gradient(135deg, #0a0a0a 0%, #1a1208 50%, #0a0a0a 100%);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .global-loader.is-visible .loader-backdrop {
+    animation: loader-bg-pulse 3s ease-in-out infinite;
+  }
+  @keyframes loader-bg-pulse {
+    0%, 100% { background:
+      radial-gradient(ellipse at center, rgba(45, 30, 10, 0.85) 0%, rgba(0, 0, 0, 0.96) 70%),
+      linear-gradient(135deg, #0a0a0a 0%, #1a1208 50%, #0a0a0a 100%); }
+    50% { background:
+      radial-gradient(ellipse at center, rgba(80, 55, 20, 0.95) 0%, rgba(0, 0, 0, 0.96) 70%),
+      linear-gradient(135deg, #0a0a0a 0%, #2a1a0a 50%, #0a0a0a 100%); }
+  }
+
+  /* Floating particles */
+  .loader-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .lp {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: var(--gold, #d4af37);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--gold, #d4af37);
+    opacity: 0;
+    animation: lp-float 6s linear infinite;
+  }
+  .lp:nth-child(1)  { left: 12%;  top: 20%; animation-delay: 0s;   animation-duration: 5s; }
+  .lp:nth-child(2)  { left: 78%;  top: 15%; animation-delay: 1s;   animation-duration: 7s; }
+  .lp:nth-child(3)  { left: 25%;  top: 75%; animation-delay: 2s;   animation-duration: 6s; }
+  .lp:nth-child(4)  { left: 88%;  top: 65%; animation-delay: 0.5s; animation-duration: 8s; }
+  .lp:nth-child(5)  { left: 50%;  top: 10%; animation-delay: 3s;   animation-duration: 5.5s; }
+  .lp:nth-child(6)  { left: 15%;  top: 50%; animation-delay: 1.5s; animation-duration: 6.5s; }
+  .lp:nth-child(7)  { left: 65%;  top: 85%; animation-delay: 2.5s; animation-duration: 7.5s; }
+  .lp:nth-child(8)  { left: 92%;  top: 35%; animation-delay: 4s;   animation-duration: 5s; }
+  .lp:nth-child(9)  { left: 8%;   top: 88%; animation-delay: 1.8s; animation-duration: 6s; }
+  .lp:nth-child(10) { left: 38%;  top: 92%; animation-delay: 3.5s; animation-duration: 7s; }
+  .lp:nth-child(11) { left: 72%;  top: 45%; animation-delay: 0.8s; animation-duration: 6.5s; }
+  .lp:nth-child(12) { left: 45%;  top: 5%;  animation-delay: 2.2s; animation-duration: 5.5s; }
+  @keyframes lp-float {
+    0%   { transform: translate(0, 0) scale(0.5); opacity: 0; }
+    10%  { opacity: 0.8; }
+    50%  { transform: translate(30px, -50px) scale(1.2); opacity: 1; }
+    90%  { opacity: 0.6; }
+    100% { transform: translate(-20px, -100px) scale(0.5); opacity: 0; }
+  }
+
+  /* Light rays from behind the logo */
+  .loader-rays {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .ray {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 200px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold, #d4af37), transparent);
+    transform-origin: 0 50%;
+    opacity: 0;
+  }
+  .global-loader.is-visible .ray {
+    animation: ray-sweep 4s ease-in-out infinite;
+  }
+  .ray.r1 { transform: rotate(0deg);   animation-delay: 0s;   }
+  .ray.r2 { transform: rotate(90deg);  animation-delay: 0.4s; }
+  .ray.r3 { transform: rotate(180deg); animation-delay: 0.8s; }
+  .ray.r4 { transform: rotate(270deg); animation-delay: 1.2s; }
+  @keyframes ray-sweep {
+    0%, 100% { opacity: 0; transform-origin: 0 50%; }
+    50%      { opacity: 0.5; }
+  }
+
+  /* Main stage */
+  .loader-stage {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+  }
+
+  /* Logo with glow rings */
+  .loader-logo {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .global-loader.is-visible .loader-logo {
+    animation: logo-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes logo-pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.05); }
+  }
+
+  .loader-glow-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--gold, #d4af37);
+    opacity: 0.6;
+  }
+  .global-loader.is-visible .loader-glow-ring {
+    animation: ring-expand 2.4s ease-out infinite;
+  }
+  .global-loader.is-visible .loader-glow-ring-2 {
+    animation-delay: 1.2s;
+  }
+  @keyframes ring-expand {
+    0%   { transform: scale(0.6); opacity: 0.8; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+
+  .loader-mark {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold, #d4af37) 0%, #8b6914 100%);
+    box-shadow:
+      0 0 30px rgba(212, 175, 55, 0.6),
+      0 0 60px rgba(212, 175, 55, 0.3),
+      inset 0 0 20px rgba(255, 215, 100, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+  .global-loader.is-visible .loader-mark {
+    animation: mark-shimmer 3s ease-in-out infinite;
+  }
+  @keyframes mark-shimmer {
+    0%, 100% { box-shadow:
+      0 0 30px rgba(212, 175, 55, 0.6),
+      0 0 60px rgba(212, 175, 55, 0.3),
+      inset 0 0 20px rgba(255, 215, 100, 0.4); }
+    50% { box-shadow:
+      0 0 40px rgba(212, 175, 55, 0.9),
+      0 0 80px rgba(212, 175, 55, 0.5),
+      inset 0 0 30px rgba(255, 215, 100, 0.6); }
+  }
+  .loader-mark-tz {
+    font-size: 30px;
+    font-weight: 900;
+    color: #1a1208;
+    letter-spacing: -1px;
+    text-shadow: 0 1px 0 rgba(255, 215, 100, 0.5);
+    position: relative;
+  }
+  .loader-mark-dot {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: #1a1208;
+    border-radius: 50%;
+  }
+
+  /* Orbiting dots */
+  .loader-orbit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+  }
+  .loader-orbit .loader-dot {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    width: 8px;
+    height: 8px;
+    background: var(--gold, #d4af37);
+    border-radius: 50%;
+    box-shadow: 0 0 12px var(--gold, #d4af37);
+  }
+  .loader-orbit-1 { animation: orbit-1 3s linear infinite; }
+  .loader-orbit-1 .loader-dot { transform: translateX(75px); }
+  .loader-orbit-2 { animation: orbit-2 3.5s linear infinite; }
+  .loader-orbit-2 .loader-dot {
+    transform: translateX(60px);
+    background: #ffd700;
+    box-shadow: 0 0 14px #ffd700;
+  }
+  .loader-orbit-3 { animation: orbit-3 4s linear infinite reverse; }
+  .loader-orbit-3 .loader-dot {
+    transform: translateX(90px);
+    width: 6px;
+    height: 6px;
+    top: -3px;
+    left: -3px;
+    background: #b8860b;
+    box-shadow: 0 0 10px #b8860b;
+  }
+  @keyframes orbit-1 {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes orbit-2 {
+    from { transform: rotate(120deg); }
+    to   { transform: rotate(480deg); }
+  }
+  @keyframes orbit-3 {
+    from { transform: rotate(240deg); }
+    to   { transform: rotate(600deg); }
+  }
+
+  /* Brand name with shimmer */
+  .loader-brand {
+    margin-top: 12px;
+    text-align: center;
+  }
+  .loader-brand-text {
+    position: relative;
+    display: inline-block;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--gold, #d4af37);
+    text-transform: uppercase;
+  }
+  .loader-brand-text::before {
+    content: attr(data-text);
+    position: absolute;
+    inset: 0;
+    color: #fff;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 0;
+    animation: shimmer 2.5s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0%, 100% { width: 0; }
+    50%      { width: 100%; }
+  }
+
+  /* Status text */
+  .loader-status {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-align: center;
+    min-width: 140px;
+    animation: status-fade 2s ease-in-out infinite;
+  }
+  @keyframes status-fade {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+  }
+
+  /* Progress bar */
+  .loader-progress {
+    width: 180px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1px;
+    overflow: hidden;
+    position: relative;
+  }
+  .loader-progress-bar {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, var(--gold, #d4af37), transparent);
+    width: 30%;
+    animation: progress-slide 1.8s ease-in-out infinite;
+  }
+  @keyframes progress-slide {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(400%); }
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 480px) {
+    .loader-logo { width: 90px; height: 90px; }
+    .loader-mark { width: 64px; height: 64px; }
+    .loader-mark-tz { font-size: 24px; }
+    .loader-orbit-1 .loader-dot { transform: translateX(60px); }
+    .loader-orbit-2 .loader-dot { transform: translateX(48px); }
+    .loader-orbit-3 .loader-dot { transform: translateX(72px); }
+    .loader-brand-text { font-size: 15px; letter-spacing: 3px; }
+    .loader-progress { width: 140px; }
+  }
+
+  /* Respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .global-loader.is-visible .loader-logo,
+    .global-loader.is-visible .loader-mark,
+    .global-loader.is-visible .loader-glow-ring,
+    .global-loader.is-visible .ray,
+    .loader-orbit-1, .loader-orbit-2, .loader-orbit-3,
+    .loader-brand-text::before,
+    .loader-progress-bar,
+    .lp {
+      animation: none !important;
+    }
+  }
+</style>

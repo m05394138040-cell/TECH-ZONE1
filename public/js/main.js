@@ -339,3 +339,117 @@
 
   start();
 })();
+
+// ===== Global Page Loader =====
+(function () {
+  'use strict';
+
+  const loader = document.getElementById('globalLoader');
+  if (!loader) return;
+
+  const statusEl = document.getElementById('loaderStatus');
+  const messages = ['جاري التحميل', 'لحظة من فضلك', 'يتم تجهيز المحتوى', 'تقريباً جاهز'];
+  let msgIdx = 0;
+  let msgTimer = null;
+  let isShowing = false;
+  let minVisibleTimer = null;
+  const MIN_VISIBLE_MS = 600;
+
+  function setStatus(text) {
+    if (statusEl) statusEl.textContent = text;
+  }
+
+  function cycleStatus() {
+    if (!isShowing) return;
+    msgIdx = (msgIdx + 1) % messages.length;
+    setStatus(messages[msgIdx]);
+  }
+
+  function showLoader(text) {
+    if (isShowing) {
+      if (text) setStatus(text);
+      return;
+    }
+    isShowing = true;
+    loader.classList.remove('is-hiding');
+    loader.classList.add('is-visible');
+    loader.setAttribute('aria-hidden', 'false');
+    setStatus(text || messages[0]);
+    msgIdx = 0;
+    if (msgTimer) clearInterval(msgTimer);
+    msgTimer = setInterval(cycleStatus, 1200);
+  }
+
+  function hideLoader() {
+    if (!isShowing) return;
+    if (minVisibleTimer) {
+      clearTimeout(minVisibleTimer);
+      minVisibleTimer = null;
+    }
+    isShowing = false;
+    loader.classList.add('is-hiding');
+    setTimeout(() => {
+      loader.classList.remove('is-visible', 'is-hiding');
+      loader.setAttribute('aria-hidden', 'true');
+      if (msgTimer) { clearInterval(msgTimer); msgTimer = null; }
+    }, 500);
+  }
+
+  function scheduleMinHide() {
+    if (minVisibleTimer) clearTimeout(minVisibleTimer);
+    minVisibleTimer = setTimeout(hideLoader, MIN_VISIBLE_MS);
+  }
+
+  // ===== 1. Page load =====
+  showLoader('جاري التحميل');
+  const onReady = () => scheduleMinHide();
+  if (document.readyState === 'complete') {
+    onReady();
+  } else {
+    window.addEventListener('load', onReady, { once: true });
+  }
+
+  // ===== 2. Link clicks (intercept internal navigation) =====
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    // Skip external, hash, target=_blank, javascript:, mailto:, tel:
+    if (
+      !href ||
+      href.startsWith('#') ||
+      href.startsWith('javascript:') ||
+      href.startsWith('mailto:') ||
+      href.startsWith('tel:') ||
+      link.target === '_blank' ||
+      link.hasAttribute('download') ||
+      (link.origin && link.origin !== window.location.origin)
+    ) {
+      return;
+    }
+    // Skip admin nav (admin has its own UX)
+    if (href.startsWith('/admin')) return;
+    showLoader('جاري الانتقال');
+    // Browser will navigate; loader fades out naturally when new page loads
+  });
+
+  // ===== 3. Form submissions =====
+  document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (!form || form.tagName !== 'FORM') return;
+    if (form.closest('.admin-panel')) return;
+    showLoader('جاري الإرسال');
+  });
+
+  // ===== 4. Show on bfcache restore =====
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) hideLoader();
+  });
+
+  // ===== 5. Hide if page fails to fully load after 10s (failsafe) =====
+  setTimeout(() => { if (isShowing) hideLoader(); }, 10000);
+
+  // Expose for AJAX callers
+  window.__showLoader = showLoader;
+  window.__hideLoader = hideLoader;
+})();
