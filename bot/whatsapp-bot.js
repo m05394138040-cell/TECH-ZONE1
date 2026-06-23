@@ -73,21 +73,14 @@ async function createClient() {
   const possibleChromePaths = [
     process.env.PUPPETEER_EXECUTABLE_PATH,
     process.env.CHROME_PATH,
-    // Standard system Chrome locations
+    // Standard system Chrome locations (from apt install)
     '/usr/bin/chromium',
     '/usr/bin/chromium-browser',
+    '/usr/bin/chromium-browser-stable',
     '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
     '/snap/bin/chromium',
-    // Render-specific puppeteer cache paths (multiple versions)
-    '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.108/chrome-linux64/chrome',
-    '/opt/render/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome',
-    '/opt/render/.cache/puppeteer/chrome/linux-150.0.7871.24/chrome-linux64/chrome',
-    // Local / root puppeteer cache
-    '/root/.cache/puppeteer/chrome/linux-131.0.6778.108/chrome-linux64/chrome',
-    '/root/.cache/puppeteer/chrome/linux-146.0.7680.31/chrome-linux64/chrome',
-    '/root/.cache/puppeteer/chrome/linux-150.0.7871.24/chrome-linux64/chrome',
-  ].filter(Boolean);
+  ];
 
   let executablePath = null;
   for (const p of possibleChromePaths) {
@@ -96,13 +89,21 @@ async function createClient() {
     } catch {}
   }
 
-  // Last resort: glob the puppeteer cache directory for the latest chrome
+  // Check puppeteer cache for Chrome 146 (whatsapp-web.js needs it)
   if (!executablePath) {
     const cacheDirs = ['/opt/render/.cache/puppeteer/chrome', '/root/.cache/puppeteer/chrome'];
     for (const dir of cacheDirs) {
       try {
         if (fs.existsSync(dir)) {
-          const versions = fs.readdirSync(dir).filter(v => v.startsWith('linux-')).sort().reverse();
+          // Prefer version 146 (needed by whatsapp-web.js 1.34.7)
+          const versions = fs.readdirSync(dir)
+            .filter(v => v.startsWith('linux-'))
+            .sort((a, b) => {
+              // Prefer 146.0.7680.31
+              if (a.startsWith('linux-146')) return -1;
+              if (b.startsWith('linux-146')) return 1;
+              return b.localeCompare(a);
+            });
           for (const v of versions) {
             const candidate = path.join(dir, v, 'chrome-linux64', 'chrome');
             if (fs.existsSync(candidate)) { executablePath = candidate; break; }
@@ -112,6 +113,8 @@ async function createClient() {
       if (executablePath) break;
     }
   }
+
+  console.log('[bot] Chrome executable path:', executablePath || '(not found, will use puppeteer default)');
 
   const puppeteerConfig = {
     headless: true,
