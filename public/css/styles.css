@@ -1436,6 +1436,8 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+  opacity: 0;
+  animation: ticker-fade-in 1.2s ease-out 0.3s forwards;
 }
 .ticker-track {
   display: flex;
@@ -1453,9 +1455,14 @@ input:focus, textarea:focus, select:focus {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   padding: 0 50px;
 }
+/* LTR motion: text enters from left, moves right */
 @keyframes ticker-scroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+@keyframes ticker-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 /* Pause on hover for readability */
 .news-ticker:hover .ticker-track {
