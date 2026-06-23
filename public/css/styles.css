@@ -1434,39 +1434,43 @@ input:focus, textarea:focus, select:focus {
   height: 100%;
   display: flex;
   align-items: center;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
-  opacity: 0;
-  animation: ticker-fade-in 1.2s ease-out 0.3s forwards;
+  /* Subtle edge fade so text doesn't visually clip */
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
 }
 .ticker-track {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  animation: ticker-scroll 28s linear infinite;
+  animation: ticker-scroll 25s linear infinite;
   will-change: transform;
 }
 .ticker-text {
   display: inline-block;
+  flex-shrink: 0;
   font-family: 'El Messiri', 'Reem Kufi', 'Cairo', sans-serif;
   font-size: 19px;
   font-weight: 600;
   letter-spacing: 0.3px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  padding: 0 50px;
+  padding: 0 40px;
 }
-/* LTR motion: text enters from left, moves right */
+/* Seamless LTR infinite loop with 3 text copies:
+   Track is 3x text width. Animate from -1/3 to 0 so text moves RIGHT
+   but the loop boundary is invisible because the next copy takes over. */
 @keyframes ticker-scroll {
-  0%   { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
-}
-@keyframes ticker-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { transform: translateX(-33.3333%); }
+  to   { transform: translateX(0); }
 }
 /* Pause on hover for readability */
 .news-ticker:hover .ticker-track {
   animation-play-state: paused;
+}
+/* Mobile tuning */
+@media (max-width: 768px) {
+  .news-ticker { height: 44px; padding: 0 10px; }
+  .ticker-text { font-size: 16px; padding: 0 30px; }
+  .ticker-track { animation-duration: 22s; }
 }
 
 /* ---------- Empty State ---------- */
