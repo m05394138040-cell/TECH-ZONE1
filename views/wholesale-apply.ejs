@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title><%= title %> | <%= typeof siteName !== 'undefined' ? siteName : 'TECH ZONE' %></title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    .apply-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px;
+      background: #fdfaf3 url('/img/marble.jpg') center/cover fixed;
+    }
+    .apply-card {
+      max-width: 680px;
+      width: 100%;
+      background: rgba(20, 20, 20, 0.96);
+      color: #fff;
+      border: 2px solid var(--gold);
+      border-radius: 24px;
+      padding: 32px 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+    .apply-card h1 {
+      color: var(--gold);
+      font-size: 26px;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .apply-card .subtitle {
+      color: #ccc;
+      text-align: center;
+      margin-bottom: 22px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #444;
+      border-radius: 10px;
+      background: #1a1a1a;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+    }
+    .form-group input[dir="ltr"],
+    .form-group select[dir="ltr"] {
+      direction: ltr;
+      text-align: right;
+    }
+    .form-group textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: transform 0.1s, box-shadow 0.15s;
+      box-shadow: 0 4px 14px rgba(212, 175, 55, 0.35);
+    }
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(212, 175, 55, 0.45);
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 16px;
+      color: #aaa;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--gold); }
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .alert-error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+    .alert-success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid #22c55e;
+      color: #86efac;
+    }
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .apply-card { padding: 24px 18px; }
+      .apply-card h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="apply-page">
+    <div class="apply-card">
+      <h1>📝 تقديم طلب شريك جملة</h1>
+      <p class="subtitle">
+        املأ النموذج التالي للتقدم بطلب الانضمام كصاحب محل/شريك جملة.
+        سيتم مراجعة طلبك من قبل الإدارة خلال 24 ساعة.
+      </p>
+
+      <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-error">⚠️ <%= error %></div>
+      <% } %>
+      <% if (typeof success !== 'undefined' && success) { %>
+        <div class="alert alert-success">✅ <%= success %></div>
+      <% } %>
+
+      <% if (typeof success === 'undefined' || !success) { %>
+      <form method="POST" action="/wholesale-apply">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">الاسم الكامل *</label>
+            <input type="text" id="name" name="name" required value="<%= formData.name || '' %>" placeholder="مثال: أحمد محمد" />
+          </div>
+          <div class="form-group">
+            <label for="phone">رقم الهاتف (واتساب) *</label>
+            <input type="tel" id="phone" name="phone" required value="<%= formData.phone || '' %>" placeholder="+90 555 123 4567" dir="ltr" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="state">الولاية *</label>
+          <select id="state" name="state" required>
+            <option value="">— اختر الولاية —</option>
+            <% states.forEach(function(s) { %>
+              <option value="<%= s %>" <%= formData.state === s ? 'selected' : '' %>><%= s %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="username">اسم المستخدم *</label>
+            <input type="text" id="username" name="username" required value="<%= formData.username || '' %>" placeholder="مثال: shop_ali" dir="ltr" />
+          </div>
+          <div class="form-group">
+            <label for="password">كلمة المرور *</label>
+            <input type="password" id="password" name="password" required minlength="4" placeholder="4 أحرف على الأقل" dir="ltr" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="volume_range">حجم المشتريات المتوقع شهرياً *</label>
+          <select id="volume_range" name="volume_range" required>
+            <option value="">— اختر حجم المشتريات —</option>
+            <% volumeRanges.forEach(function(v) { %>
+              <option value="<%= v %>" <%= formData.volume_range === v ? 'selected' : '' %>><%= v %></option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="notes">ملاحظات إضافية (اختياري)</label>
+          <textarea id="notes" name="notes" placeholder="أي معلومات إضافية تود مشاركتها..."><%= formData.notes || '' %></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">📤 تقديم الطلب</button>
+      </form>
+      <% } %>
+
+      <a href="/wholesale-login" class="back-link">← العودة لتسجيل الدخول</a>
+    </div>
+  </div>
+</body>
+</html>

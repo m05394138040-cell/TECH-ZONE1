@@ -1,0 +1,120 @@
+<%- include('_head') %>
+
+<% if (error) { %><div class="error-msg"><%= error %></div><% } %>
+<% if (success) { %>
+  <div class="success-msg">
+    <%= success %>
+    <% if (typeof waLink !== 'undefined' && waLink) { %>
+      <div style="margin-top: 14px; padding: 14px; background: rgba(34, 197, 94, 0.12); border: 1px solid #22c55e; border-radius: 10px;">
+        <strong style="color: #22c55e; display: block; margin-bottom: 8px;">📱 إرسال رسالة الترحيب عبر واتساب:</strong>
+        <p style="font-size: 13px; color: var(--gray-text); margin-bottom: 10px;">
+          اضغط الزر لفتح واتساب مع الرسالة جاهزة للإرسال إلى <strong style="color: var(--gold);"><%= waName %></strong> على رقم <strong style="color: var(--gold);" dir="ltr;"><%= waPhone %></strong>:
+        </p>
+        <a href="<%= waLink %>" target="_blank" rel="noopener" class="btn btn-primary" style="background: #25D366; border-color: #25D366;">
+          💬 فتح واتساب مع الرسالة الجاهزة
+        </a>
+      </div>
+    <% } %>
+  </div>
+<% } %>
+<% if (typeof rejected !== 'undefined' && rejected) { %>
+  <div class="info-msg" style="margin-top: 12px; padding: 12px 16px; background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; border-radius: 10px; color: #fca5a5;">
+    ℹ️ <strong>ملاحظة:</strong> المتقدم لن يتلقى إشعار WhatsApp في حالة الرفض. إذا أردت إبلاغه، يمكنك التواصل معه يدوياً.
+  </div>
+<% } %>
+
+<div class="form-section">
+  <h2>📋 طلبات الشركاء (الجملة)</h2>
+  <p style="color: var(--gray-text); font-size: 13px; margin-bottom: 14px;">
+    هنا تظهر طلبات الانضمام كشريك جملة. راجع كل طلب ووافق أو ارفض. عند الموافقة، يتم إنشاء حساب جديد في قسم "أصحاب المحلات" تلقائياً.
+  </p>
+
+  <div style="display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;">
+    <a href="/admin/wholesale-applications?status=pending" class="btn btn-sm <%= filter === 'pending' ? 'btn-primary' : 'btn-secondary' %>">⏳ قيد المراجعة</a>
+    <a href="/admin/wholesale-applications?status=approved" class="btn btn-sm <%= filter === 'approved' ? 'btn-primary' : 'btn-secondary' %>">✅ مقبولة</a>
+    <a href="/admin/wholesale-applications?status=rejected" class="btn btn-sm <%= filter === 'rejected' ? 'btn-primary' : 'btn-secondary' %>">❌ مرفوضة</a>
+    <a href="/admin/wholesale-applications?status=all" class="btn btn-sm <%= filter === 'all' ? 'btn-primary' : 'btn-secondary' %>">📋 الكل</a>
+  </div>
+
+  <% if (applications.length === 0) { %>
+    <div style="text-align: center; padding: 40px 20px; color: var(--gray-muted);">
+      <div style="font-size: 48px; margin-bottom: 12px;">📭</div>
+      <p>لا توجد طلبات في هذا التصنيف</p>
+    </div>
+  <% } else { %>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px;">
+      <% applications.forEach(function(app) { %>
+        <% const statusColors = {
+             pending: { bg: 'rgba(255, 165, 0, 0.12)', border: 'orange', label: '⏳ قيد المراجعة' },
+             approved: { bg: 'rgba(34, 197, 94, 0.12)', border: '#22c55e', label: '✅ مقبول' },
+             rejected: { bg: 'rgba(239, 68, 68, 0.12)', border: '#ef4444', label: '❌ مرفوض' }
+           };
+           const st = statusColors[app.status] || statusColors.pending;
+        %>
+        <div style="background: var(--dark-card); border: 2px solid <%= st.border %>; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 18px; font-weight: 800; color: var(--white);">
+              👤 <%= app.name %>
+            </div>
+            <span style="background: <%= st.bg %>; color: <%= st.border %>; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+              <%= st.label %>
+            </span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+            <div>
+              <div style="color: var(--gray-muted); font-size: 11px;">الهاتف</div>
+              <div dir="ltr" style="color: var(--white); font-weight: 600;"><%= app.phone %></div>
+            </div>
+            <div>
+              <div style="color: var(--gray-muted); font-size: 11px;">الولاية</div>
+              <div style="color: var(--white); font-weight: 600;">📍 <%= app.state %></div>
+            </div>
+            <div>
+              <div style="color: var(--gray-muted); font-size: 11px;">اسم المستخدم</div>
+              <div dir="ltr" style="color: var(--gold); font-weight: 700;"><%= app.username %></div>
+            </div>
+            <div>
+              <div style="color: var(--gray-muted); font-size: 11px;">حجم المشتريات</div>
+              <div style="color: var(--white); font-weight: 600;">💰 <%= app.volume_range %></div>
+            </div>
+          </div>
+
+          <% if (app.notes) { %>
+            <div style="background: rgba(255, 255, 255, 0.04); padding: 8px 10px; border-radius: 6px; font-size: 12px; color: var(--gray-text); border-right: 3px solid var(--gold);">
+              <strong>ملاحظات:</strong> <%= app.notes %>
+            </div>
+          <% } %>
+
+          <div style="color: var(--gray-muted); font-size: 11px;">
+            ⏱️ <%= new Date(app.created_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) %>
+            <% if (app.reviewed_at) { %>
+              • تمت المراجعة: <%= new Date(app.reviewed_at).toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' }) %>
+            <% } %>
+          </div>
+
+          <% if (app.status === 'pending') { %>
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+              <form method="POST" action="/admin/wholesale-applications/<%= app.id %>/approve" style="flex: 1;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; background: linear-gradient(135deg, #22c55e, #16a34a); border-color: #16a34a;" data-confirm="هل أنت متأكد من قبول هذا الطلب؟ سيتم إنشاء حساب جديد.">
+                  ✅ قبول
+                </button>
+              </form>
+              <form method="POST" action="/admin/wholesale-applications/<%= app.id %>/reject" style="flex: 1;">
+                <button type="submit" class="btn btn-danger" style="width: 100%;" data-confirm="هل أنت متأكد من رفض هذا الطلب؟">
+                  ❌ رفض
+                </button>
+              </form>
+            </div>
+          <% } else { %>
+            <div style="margin-top: 4px; padding: 6px 10px; background: rgba(255, 255, 255, 0.04); border-radius: 6px; font-size: 12px; text-align: center; color: var(--gray-muted);">
+              تم اتخاذ القرار
+            </div>
+          <% } %>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('_foot') %>

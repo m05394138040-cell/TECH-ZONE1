@@ -123,6 +123,24 @@ async function createTables() {
     )
   `);
 
+  // Wholesale applications (pending review by admin)
+  await query(`
+    CREATE TABLE IF NOT EXISTS wholesale_applications (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      phone VARCHAR(50) NOT NULL,
+      state VARCHAR(50) NOT NULL,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      volume_range VARCHAR(30) NOT NULL,
+      notes TEXT DEFAULT '',
+      status VARCHAR(20) DEFAULT 'pending',
+      admin_notes TEXT DEFAULT '',
+      created_at TIMESTAMP DEFAULT NOW(),
+      reviewed_at TIMESTAMP
+    )
+  `);
+
   // Wholesale users table
   await query(`
     CREATE TABLE IF NOT EXISTS wholesale_users (

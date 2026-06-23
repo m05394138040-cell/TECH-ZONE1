@@ -693,4 +693,155 @@ router.post('/slider/reorder', async (req, res, next) => {
 });
 
 
+// ===== Wholesale Applications Management =====
+router.get('/wholesale-applications', async (req, res, next) => {
+  try {
+    const filter = req.query.status || 'pending';
+    const where = filter === 'all' ? '' : "WHERE status = $1";
+    const params = filter === 'all' ? [] : [filter];
+    const applications = await queryAll(
+      `SELECT * FROM wholesale_applications ${where} ORDER BY created_at DESC`,
+      params
+    );
+    res.render('admin/wholesale-applications', {
+      title: 'طلبات الشركاء',
+      applications,
+      filter,
+      error: null,
+      success: null,
+      active: 'wholesale-applications',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/wholesale-applications/:id/approve', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const app = await queryOne('SELECT * FROM wholesale_applications WHERE id = $1', [id]);
+    if (!app) {
+      const applications = await queryAll("SELECT * FROM wholesale_applications WHERE status = 'pending' ORDER BY created_at DESC");
+      return res.render('admin/wholesale-applications', {
+        title: 'طلبات الشركاء',
+        applications,
+        filter: 'pending',
+        error: 'الطلب غير موجود',
+        success: null,
+        active: 'wholesale-applications',
+      });
+    }
+    if (app.status !== 'pending') {
+      const applications = await queryAll("SELECT * FROM wholesale_applications WHERE status = 'pending' ORDER BY created_at DESC");
+      return res.render('admin/wholesale-applications', {
+        title: 'طلبات الشركاء',
+        applications,
+        filter: 'pending',
+        error: 'تم معالجة هذا الطلب مسبقاً',
+        success: null,
+        active: 'wholesale-applications',
+      });
+    }
+
+    // Check if username already exists in wholesale_users
+    const existing = await queryOne('SELECT id FROM wholesale_users WHERE username = $1', [app.username]);
+    if (existing) {
+      const applications = await queryAll("SELECT * FROM wholesale_applications WHERE status = 'pending' ORDER BY created_at DESC");
+      return res.render('admin/wholesale-applications', {
+        title: 'طلبات الشركاء',
+        applications,
+        filter: 'pending',
+        error: 'اسم المستخدم موجود مسبقاً في قائمة الشركاء',
+        success: null,
+        active: 'wholesale-applications',
+      });
+    }
+
+    // Create the wholesale user from the application
+    await query(
+      `INSERT INTO wholesale_users (username, password_hash, name, phone, notes, is_active)
+       VALUES ($1, $2, $3, $4, $5, TRUE)`,
+      [app.username, app.password_hash, app.name, app.phone, 'تمت الموافقة من طلب رقم ' + id]
+    );
+
+    // Mark application as approved
+    await query(
+      "UPDATE wholesale_applications SET status = 'approved', reviewed_at = NOW() WHERE id = $1",
+      [id]
+    );
+
+    // Build the WhatsApp message
+    const siteUrl = process.env.SITE_URL || 'https://tech-zone1.onrender.com';
+    const waMessage = `🎉 أهلاً وسهلاً ${app.name}!\n\nشكراً لك على تقديم طلب الشراكة مع TECH ZONE.\n\n✅ تم قبول طلبك بنجاح!\n\nيمكنك الآن تصفح جميع المنتجات بأسعار الجملة الحصرية عبر الرابط:\n${siteUrl}\n\nاسم المستخدم: ${app.username}\n\nنتمنى لك تجربة تسوق ممتعة! 🛍️`;
+
+    // Normalize phone: strip non-digits
+    const cleanPhone = (app.phone || '').replace(/[^0-9]/g, '');
+    const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMessage)}` : null;
+
+    // Re-fetch applications and show success
+    const applications = await queryAll("SELECT * FROM wholesale_applications ORDER BY created_at DESC");
+    res.render('admin/wholesale-applications', {
+      title: 'طلبات الشركاء',
+      applications,
+      filter: 'all',
+      error: null,
+      success: `تمت الموافقة على طلب ${app.name} بنجاح! تم إنشاء حسابه.`,
+      waLink,
+      waPhone: cleanPhone,
+      waName: app.name,
+      active: 'wholesale-applications',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/wholesale-applications/:id/reject', async (req, res, next) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const app = await queryOne('SELECT * FROM wholesale_applications WHERE id = $1', [id]);
+    if (!app) {
+      const applications = await queryAll("SELECT * FROM wholesale_applications WHERE status = 'pending' ORDER BY created_at DESC");
+      return res.render('admin/wholesale-applications', {
+        title: 'طلبات الشركاء',
+        applications,
+        filter: 'pending',
+        error: 'الطلب غير موجود',
+        success: null,
+        active: 'wholesale-applications',
+      });
+    }
+    if (app.status !== 'pending') {
+      const applications = await queryAll("SELECT * FROM wholesale_applications WHERE status = 'pending' ORDER BY created_at DESC");
+      return res.render('admin/wholesale-applications', {
+        title: 'طلبات الشركاء',
+        applications,
+        filter: 'pending',
+        error: 'تم معالجة هذا الطلب مسبقاً',
+        success: null,
+        active: 'wholesale-applications',
+      });
+    }
+
+    await query(
+      "UPDATE wholesale_applications SET status = 'rejected', reviewed_at = NOW() WHERE id = $1",
+      [id]
+    );
+
+    const applications = await queryAll("SELECT * FROM wholesale_applications ORDER BY created_at DESC");
+    res.render('admin/wholesale-applications', {
+      title: 'طلبات الشركاء',
+      applications,
+      filter: 'all',
+      error: null,
+      success: `تم رفض طلب ${app.name}. ❌`,
+      rejected: true,
+      active: 'wholesale-applications',
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 module.exports = router;

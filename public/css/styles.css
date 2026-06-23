@@ -953,6 +953,28 @@ input:focus, textarea:focus, select:focus {
 .btn-sm { padding: 6px 12px; font-size: 12px; }
 
 
+
+/* Apply link */
+.apply-link {
+  display: inline-block;
+  padding: 8px 16px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  color: var(--gold);
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.apply-link:hover {
+  background: var(--gold);
+  color: #1a1a1a !important;
+}
+.apply-link strong {
+  color: inherit;
+  font-weight: 700;
+}
+
 /* ---------- Header Search ---------- */
 .header-search {
   position: relative;
