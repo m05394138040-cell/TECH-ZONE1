@@ -18,9 +18,38 @@ router.get('/contact', async (req, res, next) => {
   }
 });
 
-// ===== Home: list categories + slider images =====
+// ===== Home: slider + latest products (paginated) + categories =====
+const PRODUCTS_PER_PAGE = 10;
+
 router.get('/', async (req, res, next) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const offset = (page - 1) * PRODUCTS_PER_PAGE;
+
+    // Count total available products for pagination
+    const totalRow = await queryOne(
+      'SELECT COUNT(*)::int AS c FROM products WHERE available = TRUE'
+    );
+    const totalProducts = totalRow?.c || 0;
+    const totalPages = Math.max(1, Math.ceil(totalProducts / PRODUCTS_PER_PAGE));
+    const currentPage = Math.min(page, totalPages);
+
+    // Recompute offset in case currentPage was clamped
+    const safeOffset = (currentPage - 1) * PRODUCTS_PER_PAGE;
+
+    // Fetch latest products (don't include price_cost — admin only)
+    const latestProducts = await queryAll(
+      `SELECT p.id, p.name, p.price, p.price_retail, p.image_type, p.available,
+              c.name AS category_name, c.slug AS category_slug
+         FROM products p
+         JOIN categories c ON c.id = p.category_id
+        WHERE p.available = TRUE
+        ORDER BY p.id DESC
+        LIMIT $1 OFFSET $2`,
+      [PRODUCTS_PER_PAGE, safeOffset]
+    );
+
+    // Categories
     const categories = await queryAll(
       `SELECT c.id, c.name, c.slug, c.icon, c.image_type,
               (SELECT COUNT(*) FROM products p
@@ -28,14 +57,25 @@ router.get('/', async (req, res, next) => {
          FROM categories c
         ORDER BY c.sort_order, c.id`
     );
-    // Only send metadata (no image data) for slider — the <img> tags fetch from /slider-img/:id
+
+    // Active slider images
     const sliderImages = await queryAll(
       `SELECT id, title, link_url
          FROM slider_images
         WHERE is_active = TRUE
         ORDER BY sort_order, id DESC`
     );
-    res.render('index', { title: res.locals.siteName, categories, sliderImages });
+
+    res.render('index', {
+      title: res.locals.siteName,
+      categories,
+      sliderImages,
+      latestProducts,
+      currentPage,
+      totalPages,
+      totalProducts,
+      productsPerPage: PRODUCTS_PER_PAGE,
+    });
   } catch (err) {
     next(err);
   }

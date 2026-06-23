@@ -40,6 +40,97 @@
   </section>
 <% } %>
 
+<% if (latestProducts && latestProducts.length > 0) { %>
+  <section class="latest-products-section" aria-label="أحدث المنتجات">
+    <div class="latest-products-header">
+      <h2 class="section-title latest-title" id="latest">
+        <span class="latest-icon">🆕</span>
+        أحدث المنتجات
+      </h2>
+      <div class="latest-meta">
+        <span class="latest-count">
+          <% if (totalProducts === 1) { %>
+            منتج واحد
+          <% } else { %>
+            <%= totalProducts %> منتج
+          <% } %>
+        </span>
+        <% if (totalPages > 1) { %>
+          <span class="latest-page-info">صفحة <%= currentPage %> من <%= totalPages %></span>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="latest-products-grid">
+      <% latestProducts.forEach(function(p) { %>
+        <% const dp = displayPrice(p); %>
+        <a href="/product/<%= p.id %>" class="latest-product-card">
+          <div class="latest-product-image">
+            <% if (p.image_type) { %>
+              <img src="/img/<%= p.id %>" alt="<%= p.name %>" loading="lazy" />
+            <% } else { %>
+              <div class="latest-product-placeholder">📦</div>
+            <% } %>
+            <span class="latest-product-badge">جديد</span>
+          </div>
+          <div class="latest-product-body">
+            <div class="latest-product-name"><%= p.name %></div>
+            <div class="latest-product-category">📂 <%= p.category_name %></div>
+            <div class="latest-product-price">
+              <%= dp.amount %>
+              <span class="latest-currency"><%= dp.symbol %></span>
+            </div>
+          </div>
+        </a>
+      <% }); %>
+    </div>
+
+    <%# Pagination %>
+    <% if (totalPages > 1) { %>
+      <nav class="latest-pagination" aria-label="تصفح الصفحات">
+        <%# Previous %>
+        <% if (currentPage > 1) { %>
+          <a class="page-btn" href="/?page=<%= currentPage - 1 %>#latest" aria-label="الصفحة السابقة">‹ السابق</a>
+        <% } else { %>
+          <span class="page-btn disabled" aria-disabled="true">‹ السابق</span>
+        <% } %>
+
+        <%# Page numbers — show first, last, current ± 2 %>
+        <%
+          const pages = [];
+          const start = Math.max(1, currentPage - 2);
+          const end = Math.min(totalPages, currentPage + 2);
+          if (start > 1) {
+            pages.push(1);
+            if (start > 2) pages.push('...');
+          }
+          for (let i = start; i <= end; i++) pages.push(i);
+          if (end < totalPages) {
+            if (end < totalPages - 1) pages.push('...');
+            pages.push(totalPages);
+          }
+        %>
+        <% pages.forEach(function(p) { %>
+          <% if (p === '...') { %>
+            <span class="page-ellipsis">…</span>
+          <% } else if (p === currentPage) { %>
+            <span class="page-btn active" aria-current="page"><%= p %></span>
+          <% } else { %>
+            <a class="page-btn" href="/?page=<%= p %>#latest"><%= p %></a>
+          <% } %>
+        <% }); %>
+
+        <%# Next %>
+        <% if (currentPage < totalPages) { %>
+          <a class="page-btn" href="/?page=<%= currentPage + 1 %>#latest" aria-label="الصفحة التالية">التالي ›</a>
+        <% } else { %>
+          <span class="page-btn disabled" aria-disabled="true">التالي ›</span>
+        <% } %>
+      </nav>
+    <% } %>
+  </section>
+<% } %>
+
 <h2 class="section-title" id="categories">تصفح الأقسام</h2>
 
 <% if (categories.length === 0) { %>

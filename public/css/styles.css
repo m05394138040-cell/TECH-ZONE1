@@ -59,6 +59,10 @@ html, body {
   color: var(--text);
   overflow-x: hidden;
   max-width: 100vw;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 
 body { overflow-x: hidden; }
