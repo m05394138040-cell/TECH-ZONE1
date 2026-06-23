@@ -1437,20 +1437,29 @@ input:focus, textarea:focus, select:focus {
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
 }
+.ticker-track {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: ticker-scroll 28s linear infinite;
+  will-change: transform;
+}
 .ticker-text {
   display: inline-block;
-  white-space: nowrap;
-  padding-left: 100%;
   font-family: 'El Messiri', 'Reem Kufi', 'Cairo', sans-serif;
   font-size: 19px;
   font-weight: 600;
   letter-spacing: 0.3px;
-  animation: ticker-scroll 45s linear infinite;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  padding: 0 50px;
 }
 @keyframes ticker-scroll {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+/* Pause on hover for readability */
+.news-ticker:hover .ticker-track {
+  animation-play-state: paused;
 }
 
 /* ---------- Empty State ---------- */
