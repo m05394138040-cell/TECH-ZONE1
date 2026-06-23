@@ -1434,49 +1434,23 @@ input:focus, textarea:focus, select:focus {
   height: 100%;
   display: flex;
   align-items: center;
-  /* Force LTR layout so track starts at the left edge (RTL pages push flex children to the right) */
-  direction: ltr;
-  /* Subtle edge fade so text doesn't visually clip */
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
-}
-.ticker-track {
-  display: flex;
-  align-items: center;
-  white-space: nowrap;
-  animation: ticker-scroll 25s linear infinite;
-  will-change: transform;
-  flex-shrink: 0;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 4%, black 96%, transparent 100%);
 }
 .ticker-text {
   display: inline-block;
-  flex-shrink: 0;
-  /* Keep Arabic text rendering correctly inside each span */
-  direction: rtl;
-  unicode-bidi: isolate;
-  font-family: 'El Messiri', 'Reem Kufi', 'Cairo', sans-serif;
-  font-size: 19px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+  white-space: nowrap;
+  padding-right: 100%;
+  font-family: 'Aref Ruqaa', 'Cairo', serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  animation: ticker-scroll 45s linear infinite;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  padding: 0 40px;
 }
-/* Seamless LTR infinite loop with 3 text copies:
-   Track is 3x text width. Animate from -1/3 to 0 so text moves RIGHT
-   but the loop boundary is invisible because the next copy takes over. */
 @keyframes ticker-scroll {
-  from { transform: translateX(-33.3333%); }
-  to   { transform: translateX(0); }
-}
-/* Pause on hover for readability */
-.news-ticker:hover .ticker-track {
-  animation-play-state: paused;
-}
-/* Mobile tuning */
-@media (max-width: 768px) {
-  .news-ticker { height: 44px; padding: 0 10px; }
-  .ticker-text { font-size: 16px; padding: 0 30px; }
-  .ticker-track { animation-duration: 22s; }
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
 }
 
 /* ---------- Empty State ---------- */
@@ -1922,5 +1896,5 @@ input:focus, textarea:focus, select:focus {
   .contact-dropdown { min-width: 200px; }
 }
 
-/* Google Fonts (Cairo + El Messiri for elegant Arabic typography) */
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=El+Messiri:wght@400;500;600;700&family=Reem+Kufi:wght@400;500;600;700&family=Lalezar&display=swap');
+/* Google Fonts (Cairo + Aref Ruqaa for elegant Arabic typography) */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Aref+Ruqaa:wght@400;700&display=swap');
