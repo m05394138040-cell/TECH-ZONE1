@@ -1445,7 +1445,9 @@ input:focus, textarea:focus, select:focus {
   font-size: 18px;
   font-weight: 700;
   letter-spacing: 0.5px;
+  /* Negative delay starts the animation mid-cycle so text is visible immediately on page load */
   animation: ticker-scroll 45s linear infinite;
+  animation-delay: -22s;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 @keyframes ticker-scroll {
