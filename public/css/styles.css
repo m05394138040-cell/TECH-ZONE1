@@ -1449,8 +1449,8 @@ input:focus, textarea:focus, select:focus {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 @keyframes ticker-scroll {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* ---------- Empty State ---------- */
